@@ -1,0 +1,18 @@
+{"level":"info","message":"🚀 Iniciando teste de disparo manual...","timestamp":"2026-04-23T15:25:42.261Z"}
+{"level":"error","message":"CallMeBot returned unexpected status: 203","timestamp":"2026-04-23T15:25:43.240Z"}
+{"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-04-23T15:25:43.240Z"}
+{"level":"info","message":"🚀 Iniciando teste de disparo manual...","timestamp":"2026-04-23T15:57:04.099Z"}
+{"level":"error","message":"CallMeBot returned status 203: <p>Message to: +5547992843977<p>Text to send: 🔔 Lembrete de ponto: TESTE_MANUAL<p style=\"color:red\"><b>APIKey is invalid.</b> Please create a new one or contact support if you lost it.","timestamp":"2026-04-23T15:57:05.114Z"}
+{"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-04-23T15:57:05.114Z"}
+{"level":"info","message":"🚀 Iniciando teste de disparo manual...","timestamp":"2026-04-23T15:58:15.502Z"}
+{"level":"error","message":"CallMeBot returned status 203: <p>Message to: +5547992843977<p>Text to send: 🔔 Lembrete de ponto: TESTE_MANUAL<p style=\"color:red\"><b>APIKey is invalid.</b> Please create a new one or contact support if you lost it.","timestamp":"2026-04-23T15:58:16.468Z"}
+{"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-04-23T15:58:16.468Z"}
+{"level":"info","message":"🚀 Iniciando teste de disparo manual...","timestamp":"2026-04-23T15:58:37.635Z"}
+{"level":"error","message":"CallMeBot returned status 203: <p>Message to: +5547992843977<p>Text to send: 🔔 Lembrete de ponto: TESTE_MANUAL<p style=\"color:red\"><b>APIKey is invalid.</b> Please create a new one or contact support if you lost it.","timestamp":"2026-04-23T15:58:38.581Z"}
+{"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-04-23T15:58:38.581Z"}
+{"level":"info","message":"🚀 Iniciando teste de disparo manual...","timestamp":"2026-04-23T16:00:42.592Z"}
+{"level":"info","message":"Message sent via CallMeBot for TESTE_MANUAL. Response: <p>Message to: +554792843977<p>Text to send: 🔔 Lembrete de ponto: TESTE_MANUAL<p><b>Message queued.</b> You will receive it in a few seconds.","timestamp":"2026-04-23T16:00:43.562Z"}
+{"level":"info","message":"✅ Teste concluído com sucesso! Verifique seu WhatsApp.","timestamp":"2026-04-23T16:00:43.562Z"}
+{"level":"info","message":"🚀 Iniciando teste de disparo manual...","timestamp":"2026-04-23T16:02:16.975Z"}
+{"level":"info","message":"Message sent via CallMeBot for TESTE_MANUAL. Response: <p>Message to: +554792843977<p>Text to send: 🔔 Lembrete de ponto: TESTE_MANUAL<p><b>Message queued.</b> You will receive it in a few seconds.","timestamp":"2026-04-23T16:02:17.940Z"}
+{"level":"info","message":"✅ Teste concluído com sucesso! Verifique seu WhatsApp.","timestamp":"2026-04-23T16:02:17.941Z"}

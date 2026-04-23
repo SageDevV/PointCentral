@@ -1,0 +1,8 @@
+{"level":"error","message":"CallMeBot returned unexpected status: 203","timestamp":"2026-04-23T15:25:43.240Z"}
+{"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-04-23T15:25:43.240Z"}
+{"level":"error","message":"CallMeBot returned status 203: <p>Message to: +5547992843977<p>Text to send: 🔔 Lembrete de ponto: TESTE_MANUAL<p style=\"color:red\"><b>APIKey is invalid.</b> Please create a new one or contact support if you lost it.","timestamp":"2026-04-23T15:57:05.114Z"}
+{"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-04-23T15:57:05.114Z"}
+{"level":"error","message":"CallMeBot returned status 203: <p>Message to: +5547992843977<p>Text to send: 🔔 Lembrete de ponto: TESTE_MANUAL<p style=\"color:red\"><b>APIKey is invalid.</b> Please create a new one or contact support if you lost it.","timestamp":"2026-04-23T15:58:16.468Z"}
+{"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-04-23T15:58:16.468Z"}
+{"level":"error","message":"CallMeBot returned status 203: <p>Message to: +5547992843977<p>Text to send: 🔔 Lembrete de ponto: TESTE_MANUAL<p style=\"color:red\"><b>APIKey is invalid.</b> Please create a new one or contact support if you lost it.","timestamp":"2026-04-23T15:58:38.581Z"}
+{"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-04-23T15:58:38.581Z"}
