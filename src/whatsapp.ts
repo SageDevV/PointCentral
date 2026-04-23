@@ -18,11 +18,22 @@ class WhatsAppService {
 
     try {
       const url = `https://api.callmebot.com/whatsapp.php?phone=${this.phoneNumber}&text=${encodeURIComponent(text)}&apikey=${this.apiKey}&source=php`;
-      await axios.get(url);
+      const response = await axios.get(url);
+      
+      // O CallMeBot às vezes retorna erros no corpo da mensagem mesmo com status 2xx
+      if (response.data && (response.data.includes('APIKey is invalid') || response.data.includes('error'))) {
+        logger.error(`CallMeBot returned error in body: ${response.data}`);
+        return false;
+      }
+
       logger.info('WhatsApp message sent successfully');
       return true;
-    } catch (error) {
-      logger.error('Error sending WhatsApp message:', error);
+    } catch (error: any) {
+      if (error.response) {
+        logger.error(`CallMeBot returned status ${error.response.status}: ${error.response.data}`);
+      } else {
+        logger.error('Error sending WhatsApp message:', error.message);
+      }
       return false;
     }
   }
