@@ -14,7 +14,9 @@ async function checkAndNotify() {
 
   logger.info(`Checking static notifications at ${currentTimeStr} (${timezone})`);
 
-  const notificationTimes = (process.env.NOTIFICATION_TIMES || '08:00,11:30,12:30,17:45').split(',');
+  const notificationTimesRaw = process.env.NOTIFICATION_TIMES || '08:00,11:30,12:30,17:45';
+  logger.info(`Notification times loaded: ${notificationTimesRaw}`);
+  const notificationTimes = notificationTimesRaw.split(',');
 
   for (const time of notificationTimes) {
     const targetTime = time.trim();
