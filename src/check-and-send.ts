@@ -12,32 +12,27 @@ async function checkAndNotify() {
   const currentTimeStr = now.toFormat('HH:mm');
   const today = now.toFormat('yyyy-MM-dd');
 
-  logger.info(`Checking notifications at ${currentTimeStr} (${timezone})`);
+  logger.info(`Checking static notifications at ${currentTimeStr} (${timezone})`);
 
-  const notificationTimes = (process.env.NOTIFICATION_TIMES || '').split(',');
+  const notificationTimes = (process.env.NOTIFICATION_TIMES || '08:00,11:30,12:30,17:45').split(',');
 
   for (const time of notificationTimes) {
     const targetTime = time.trim();
     
-    // Se a hora atual é igual ao horário configurado
-    // (Ou se estamos dentro de uma janela de 5 minutos, caso o GitHub atrase um pouco)
+    // Verifica se estamos no minuto exato ou em uma janela de 5 minutos (para o GitHub Actions)
     const diffMinutes = now.diff(DateTime.fromFormat(targetTime, 'HH:mm', { zone: timezone }).set({ 
       year: now.year, month: now.month, day: now.day 
     }), 'minutes').minutes;
 
-    // Se estivermos entre 0 e 5 minutos após o horário alvo
     if (diffMinutes >= 0 && diffMinutes < 5) {
-      const alreadySent = storage.isAlreadySent(today, targetTime);
+      const alreadySent = storage.wasSent(today, targetTime);
 
       if (!alreadySent) {
-        logger.info(`Time match found for ${targetTime}. Sending notification...`);
+        logger.info(`Time match found for ${targetTime}. Sending WhatsApp...`);
         const success = await whatsapp.sendMessage(targetTime);
         if (success) {
           storage.markAsSent(today, targetTime);
-          logger.info(`Successfully sent and marked ${targetTime} as done.`);
         }
-      } else {
-        logger.info(`Notification for ${targetTime} already sent today.`);
       }
     }
   }
