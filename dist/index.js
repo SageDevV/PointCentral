@@ -4,12 +4,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
-// Load environment variables from .env file
-dotenv_1.default.config();
+const express_1 = __importDefault(require("express"));
 const logger_1 = __importDefault(require("./logger"));
 const scheduler_1 = __importDefault(require("./scheduler"));
+// Load environment variables
+dotenv_1.default.config();
+const app = (0, express_1.default)();
+const port = process.env.PORT || 3000;
+// 1. Iniciar o servidor IMEDIATAMENTE (Prioridade para o Render)
+app.get('/', (req, res) => res.send('Point Notification System is running! 🤖'));
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
+app.listen(Number(port), '0.0.0.0', () => {
+    logger_1.default.info(`🚀 Health check server listening on port ${port}`);
+});
+// 2. Iniciar a lógica do sistema
 async function main() {
-    logger_1.default.info('Initializing Point Notification System...');
+    logger_1.default.info('Initializing Scheduler...');
     try {
         scheduler_1.default.start();
         logger_1.default.info('System is running in background.');
@@ -20,12 +30,6 @@ async function main() {
     }
 }
 // Handle termination
-process.on('SIGINT', () => {
-    logger_1.default.info('Shutting down gracefully...');
-    process.exit(0);
-});
-process.on('SIGTERM', () => {
-    logger_1.default.info('Shutting down gracefully...');
-    process.exit(0);
-});
+process.on('SIGINT', () => process.exit(0));
+process.on('SIGTERM', () => process.exit(0));
 main();

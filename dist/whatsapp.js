@@ -7,35 +7,41 @@ const axios_1 = __importDefault(require("axios"));
 const logger_1 = __importDefault(require("./logger"));
 class WhatsAppService {
     constructor() {
-        this.baseUrl = 'https://graph.facebook.com/v17.0';
+        this.baseUrl = 'https://api.callmebot.com/whatsapp.php';
     }
+    /**
+     * Sends a message using CallMeBot API (GET request)
+     */
     async sendMessage(timeId) {
-        const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-        const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+        const apiKey = process.env.CALLMEBOT_API_KEY;
         const recipient = process.env.RECIPIENT_PHONE_NUMBER;
-        if (!phoneNumberId || !accessToken || !recipient) {
-            logger_1.default.error('WhatsApp credentials or recipient missing in environment variables');
+        if (!apiKey || !recipient) {
+            logger_1.default.error('CallMeBot API Key or recipient missing in environment variables');
             return false;
         }
-        const message = this.getMessageContent(timeId);
+        const messageText = this.getMessageContent(timeId);
         try {
-            const response = await axios_1.default.post(`${this.baseUrl}/${phoneNumberId}/messages`, {
-                messaging_product: 'whatsapp',
-                to: recipient,
-                type: 'text',
-                text: { body: message },
-            }, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
+            // CallMeBot uses a simple GET request
+            const response = await axios_1.default.get(this.baseUrl, {
+                params: {
+                    phone: recipient,
+                    text: messageText,
+                    apikey: apiKey,
+                    source: 'php'
                 },
             });
-            logger_1.default.info(`Message sent successfully for ${timeId}. Response ID: ${response.data.messages[0].id}`);
-            return true;
+            if (response.status === 200) {
+                logger_1.default.info(`Message sent via CallMeBot for ${timeId}. Response: ${response.data}`);
+                return true;
+            }
+            else {
+                logger_1.default.error(`CallMeBot returned status ${response.status}: ${response.data}`);
+                return false;
+            }
         }
         catch (error) {
             const errorData = error.response?.data || error.message;
-            logger_1.default.error(`Failed to send WhatsApp message for ${timeId}:`, errorData);
+            logger_1.default.error(`Failed to send CallMeBot message for ${timeId}:`, errorData);
             return false;
         }
     }
