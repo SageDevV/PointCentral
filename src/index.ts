@@ -23,8 +23,8 @@ async function main() {
     res.status(200).json({ status: 'ok', uptime: process.uptime() });
   });
 
-  app.listen(port, () => {
-    logger.info(`Health check server listening on port ${port}`);
+  app.listen(Number(port), '0.0.0.0', () => {
+    logger.info(`Health check server listening on port ${port} at 0.0.0.0`);
   });
 
   try {
