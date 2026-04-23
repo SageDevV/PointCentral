@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PointCentral | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --card: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 50% -20%, #1e293b, #0f172a);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; color: var(--primary); }
+        p.subtitle { font-size: 14px; opacity: 0.6; margin-bottom: 32px; }
+
+        .clock {
+            font-size: 48px;
+            font-weight: 300;
+            margin-bottom: 40px;
+            letter-spacing: -1px;
+        }
+
+        .btn-group {
+            display: grid;
+            gap: 16px;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        button:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        button:active { transform: translateY(0); }
+
+        .status-badge {
+            margin-top: 32px;
+            padding: 8px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-radius: 100px;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        #notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 12px;
+            display: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PointCentral</h1>
+        <p class="subtitle">Assistente de Jornada Dinâmica</p>
+        
+        <div class="clock" id="clock">00:00:00</div>
+
+        <div class="btn-group">
+            <button onclick="logEvent('entry')">🚀 Registrar Entrada</button>
+            <button onclick="logEvent('lunchOut')">🍴 Saída Almoço</button>
+            <button onclick="logEvent('lunchIn')">🔙 Retorno Almoço</button>
+        </div>
+
+        <div class="status-badge" id="status">Aguardando registro...</div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('pt-BR');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        async function logEvent(type) {
+            const status = document.getElementById('status');
+            status.innerText = 'Processando...';
+            try {
+                const res = await fetch(`/api/log/${type}`, { method: 'POST' });
+                const data = await res.json();
+                status.innerText = data.message;
+                alert('Sucesso! Notificação enviada para o WhatsApp.');
+            } catch (err) {
+                status.innerText = 'Erro ao registrar.';
+                alert('Erro na conexão.');
+            }
+        }
+    </script>
+</body>
+</html>

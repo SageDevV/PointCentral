@@ -1,58 +1,51 @@
-import { DateTime } from 'luxon';
 import cron from 'node-cron';
-import logger from './logger';
+import { DateTime } from 'luxon';
 import storage from './storage';
 import whatsapp from './whatsapp';
+import logger from './logger';
 
 class SchedulerService {
-  private timezone: string;
-  private notificationTimes: string[];
-
-  constructor() {
-    this.timezone = process.env.TIMEZONE || 'America/Sao_Paulo';
-    this.notificationTimes = (process.env.NOTIFICATION_TIMES || '08:00,11:30,12:30,17:45').split(',');
-  }
+  private timezone = process.env.TIMEZONE || 'America/Sao_Paulo';
 
   public start() {
-    logger.info(`Scheduler started. Timezone: ${this.timezone}. Configured times: ${this.notificationTimes.join(', ')}`);
+    logger.info(`Smart Scheduler started for ${this.timezone}`);
 
-    // Run every minute
-    cron.schedule('* * * * *', () => {
-      this.checkAndNotify();
-    }, {
-      timezone: this.timezone
-    });
-
-    // Cleanup storage every day at midnight
-    cron.schedule('0 0 * * *', () => {
-      storage.cleanup();
-      logger.info('Storage cleanup executed.');
+    // Verifica a cada minuto se há notificações pendentes
+    cron.schedule('* * * * *', async () => {
+      await this.checkNotifications();
     }, {
       timezone: this.timezone
     });
   }
 
-  private async checkAndNotify() {
+  private async checkNotifications() {
     const now = DateTime.now().setZone(this.timezone);
-    const currentTime = now.toFormat('HH:mm');
-    const currentDate = now.toFormat('yyyy-MM-dd');
+    const dateStr = now.toFormat('yyyy-MM-dd');
+    const timeStr = now.toFormat('HH:mm');
+    
+    const logs = storage.getDayLogs(dateStr);
 
-    logger.debug(`Checking time: ${currentTime} (${currentDate})`);
+    // 1. Notificação de Saída para Almoço (baseado na entrada)
+    if (logs.entry && !logs.lunchOut && !logs.notifiedLunch) {
+      // Calcula o alvo de almoço (4h 24m após a entrada)
+      const entry = DateTime.fromFormat(logs.entry, 'HH:mm', { zone: this.timezone });
+      const targetLunch = entry.plus({ minutes: 264 }); // Metade de 8h48m
 
-    if (this.notificationTimes.includes(currentTime)) {
-      if (storage.wasSent(currentDate, currentTime)) {
-        logger.debug(`Notification for ${currentTime} already sent today.`);
-        return;
+      if (now >= targetLunch) {
+        const msg = `🍴 Hora do Almoço!\nSeu horário de saída ideal é agora (${targetLunch.toFormat('HH:mm')}).\nNão esqueça de registrar o retorno em 1 hora!`;
+        await whatsapp.sendRawMessage(msg);
+        storage.updateDayLogs(dateStr, { notifiedLunch: true });
       }
+    }
 
-      logger.info(`Triggering notification for ${currentTime}...`);
-      
-      const success = await whatsapp.sendMessage(currentTime);
-      
-      if (success) {
-        storage.markAsSent(currentDate, currentTime);
-      } else {
-        logger.error(`Failed to send notification for ${currentTime}. Will retry in the next minute check if still applicable.`);
+    // 2. Notificação de Saída Final (baseado no cálculo real)
+    if (logs.exit && !logs.notifiedExit) {
+      const targetExit = DateTime.fromFormat(logs.exit, 'HH:mm', { zone: this.timezone });
+
+      if (now >= targetExit) {
+        const msg = `🚀 Fim do Expediente!\nSua jornada de 08:48 foi concluída.\nBom descanso!`;
+        await whatsapp.sendRawMessage(msg);
+        storage.updateDayLogs(dateStr, { notifiedExit: true });
       }
     }
   }

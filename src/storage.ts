@@ -2,8 +2,17 @@ import fs from 'fs';
 import path from 'path';
 import logger from './logger';
 
+interface DayLogs {
+  entry?: string;
+  lunchOut?: string;
+  lunchIn?: string;
+  exit?: string;
+  notifiedLunch?: boolean;
+  notifiedExit?: boolean;
+}
+
 interface StorageData {
-  [date: string]: string[];
+  [date: string]: DayLogs;
 }
 
 class StorageService {
@@ -35,24 +44,16 @@ class StorageService {
     }
   }
 
-  public isAlreadySent(date: string, timeId: string): boolean {
-    return this.data[date]?.includes(timeId) || false;
+  public getDayLogs(date: string): DayLogs {
+    return this.data[date] || {};
   }
 
-  public markAsSent(date: string, timeId: string) {
-    if (!this.data[date]) {
-      this.data[date] = [];
-    }
-    if (!this.data[date].includes(timeId)) {
-      this.data[date].push(timeId);
-      this.save();
-    }
+  public updateDayLogs(date: string, logs: Partial<DayLogs>) {
+    this.data[date] = { ...this.getDayLogs(date), ...logs };
+    this.save();
   }
 
-  /**
-   * Cleanup old entries to keep the file small (e.g., keep only last 30 days)
-   */
-  public cleanup() {
+  public clearOldLogs() {
     const dates = Object.keys(this.data);
     if (dates.length > 30) {
       const sortedDates = dates.sort();
