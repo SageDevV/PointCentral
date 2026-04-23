@@ -35,7 +35,7 @@ class StorageService {
     }
   }
 
-  public wasSent(date: string, timeId: string): boolean {
+  public isAlreadySent(date: string, timeId: string): boolean {
     return this.data[date]?.includes(timeId) || false;
   }
 
