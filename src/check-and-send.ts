@@ -19,10 +19,11 @@ async function checkAndNotify() {
   for (const time of notificationTimes) {
     const targetTime = time.trim();
     
-    // Verifica se estamos no minuto exato ou em uma janela de 5 minutos (para o GitHub Actions)
     const diffMinutes = now.diff(DateTime.fromFormat(targetTime, 'HH:mm', { zone: timezone }).set({ 
       year: now.year, month: now.month, day: now.day 
     }), 'minutes').minutes;
+
+    logger.info(`- Target: ${targetTime}, Diff: ${diffMinutes.toFixed(2)} min`);
 
     if (diffMinutes >= 0 && diffMinutes < 5) {
       const alreadySent = storage.wasSent(today, targetTime);
