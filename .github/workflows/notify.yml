@@ -29,7 +29,7 @@ jobs:
           NOTIFICATION_TIMES: ${{ secrets.NOTIFICATION_TIMES }}
           TIMEZONE: ${{ secrets.TIMEZONE }}
           STORAGE_PATH: './storage.json'
-        run: npx ts-node src/check-and-send.ts
+        run: npm run check
 
       - name: Commit and push changes (storage.json)
         run: |

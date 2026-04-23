@@ -7,6 +7,7 @@
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "build": "tsc",
+    "check": "ts-node src/check-and-send.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -20,14 +21,14 @@
     "luxon": "^3.7.2",
     "node-cron": "^4.2.1",
     "winston": "^3.19.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/luxon": "^3.7.1",
     "@types/node": "^25.6.0",
     "@types/node-cron": "^3.0.11",
-    "@types/winston": "^2.4.4",
-    "ts-node": "^10.9.2"
+    "@types/winston": "^2.4.4"
   }
 }
