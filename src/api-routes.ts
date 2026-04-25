@@ -35,4 +35,18 @@ router.post('/api/register', async (_req: Request, res: Response) => {
   }
 });
 
+/** POST /api/test-whatsapp — Send a test message */
+router.post('/api/test-whatsapp', async (_req: Request, res: Response) => {
+  try {
+    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    const wppMsg = `Teste: Link: ${appUrl}`;
+    
+    await whatsapp.sendRawMessage(wppMsg);
+    res.json({ success: true, message: 'Mensagem de teste enviada.' });
+  } catch (err) {
+    logger.error('Error sending test whatsapp:', err);
+    res.status(500).json({ error: 'Erro ao enviar mensagem' });
+  }
+});
+
 export default router;

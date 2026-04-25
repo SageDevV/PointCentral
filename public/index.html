@@ -431,6 +431,11 @@
             <div class="summary-row"><span class="label">🏠 Saída</span><span class="value" id="sum-exit">--</span></div>
             <div class="summary-row total"><span class="label">⏱ Total</span><span class="value" id="sum-total">--</span></div>
         </div>
+
+        <!-- Botão de teste do WhatsApp -->
+        <button class="action-btn" style="background: rgba(255,255,255,0.05); margin-top: 10px; padding: 12px; font-size: 13px; color: var(--text-dim); border: 1px dashed var(--border);" onclick="testWhatsapp()">
+            📱 Testar WhatsApp
+        </button>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -612,6 +617,19 @@
 
         // Init
         loadState();
+        async function testWhatsapp() {
+            try {
+                const res = await fetch('/api/test-whatsapp', { method: 'POST' });
+                const data = await res.json();
+                if(data.success) {
+                    showToast('Mensagem enviada! Verifique seu WhatsApp.', 'success');
+                } else {
+                    showToast('Falha ao enviar mensagem de teste', 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão ao testar', 'error');
+            }
+        }
     </script>
 </body>
 </html>
