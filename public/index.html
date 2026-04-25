@@ -3,139 +3,615 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PointCentral | Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>PointCentral | Controle de Ponto</title>
+    <meta name="description" content="Sistema dinâmico de controle de ponto com notificações automáticas">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1;
-            --bg: #0f172a;
-            --card: rgba(30, 41, 59, 0.7);
-            --text: #f8fafc;
+            --bg: #070b14;
+            --bg-card: rgba(15, 23, 42, 0.75);
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.25);
+            --accent-light: #818cf8;
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.25);
+            --warning: #f59e0b;
+            --warning-glow: rgba(245, 158, 11, 0.2);
+            --danger: #ef4444;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --text-muted: #475569;
+            --border: rgba(255, 255, 255, 0.06);
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            background-image: radial-gradient(circle at 50% -20%, #1e293b, #0f172a);
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
             color: var(--text);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background orbs */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::before {
+            width: 600px; height: 600px;
+            background: var(--accent);
+            top: -200px; left: -100px;
+            animation: float-orb 20s ease-in-out infinite;
+        }
+        body::after {
+            width: 500px; height: 500px;
+            background: #a855f7;
+            bottom: -200px; right: -100px;
+            animation: float-orb 25s ease-in-out infinite reverse;
+        }
+
+        @keyframes float-orb {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(60px, -40px); }
+            66% { transform: translate(-40px, 30px); }
         }
 
         .container {
-            width: 90%;
-            max-width: 400px;
-            background: var(--card);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 32px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 92%;
+            max-width: 420px;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 28px;
+        }
+
+        /* === HEADER === */
+        .header { text-align: center; }
+        .header .logo {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, var(--accent), #a855f7);
+            border-radius: 18px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 8px 30px var(--accent-glow);
+            margin-bottom: 16px;
+        }
+        .header h1 {
+            font-size: 28px; font-weight: 700;
+            background: linear-gradient(135deg, var(--text), var(--accent-light));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .header .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+        /* === CLOCK === */
+        .clock {
+            font-size: 56px; font-weight: 200;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -2px;
+            color: var(--text);
+            text-align: center;
+        }
+        .clock-date {
+            font-size: 13px; color: var(--text-muted);
+            text-align: center; margin-top: 4px;
+            text-transform: capitalize;
+        }
+
+        /* === TIMELINE === */
+        .timeline {
+            width: 100%;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px 24px;
+        }
+
+        .timeline-steps {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .timeline-track {
+            position: absolute;
+            top: 50%;
+            left: 28px; right: 28px;
+            height: 3px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 2px;
+            transform: translateY(-50%);
+            z-index: 0;
+        }
+
+        .timeline-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--accent));
+            border-radius: 2px;
+            transition: width 0.6s ease;
+            width: 0%;
+        }
+
+        .step {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 8px; z-index: 1; position: relative;
+        }
+
+        .step-circle {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: 2.5px solid var(--text-muted);
+            background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px;
+            transition: all 0.4s ease;
+        }
+
+        .step.done .step-circle {
+            border-color: var(--success);
+            background: var(--success);
+            box-shadow: 0 0 16px var(--success-glow);
+        }
+
+        .step.active .step-circle {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            box-shadow: 0 0 20px var(--accent-glow);
+            animation: glow-pulse 2s infinite;
+        }
+
+        .step.waiting .step-circle {
+            border-color: var(--warning);
+            background: var(--warning-glow);
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { box-shadow: 0 0 16px var(--accent-glow); }
+            50% { box-shadow: 0 0 30px var(--accent-glow); }
+        }
+
+        .step-label {
+            font-size: 10px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+        .step.done .step-label { color: var(--success); }
+        .step.active .step-label { color: var(--accent-light); }
+
+        .step-time {
+            font-size: 12px; font-weight: 600;
+            color: var(--accent-light);
+            min-height: 16px;
+        }
+
+        /* === MAIN CARD === */
+        .action-card {
+            width: 100%;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px 24px;
             text-align: center;
         }
 
-        h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; color: var(--primary); }
-        p.subtitle { font-size: 14px; opacity: 0.6; margin-bottom: 32px; }
-
-        .clock {
-            font-size: 48px;
-            font-weight: 300;
-            margin-bottom: 40px;
-            letter-spacing: -1px;
+        .status-text {
+            font-size: 15px;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            line-height: 1.5;
         }
 
-        .btn-group {
-            display: grid;
-            gap: 16px;
-        }
+        .status-text strong { color: var(--accent-light); }
 
-        button {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 16px;
+        .action-btn {
+            width: 100%;
+            padding: 18px 24px;
+            border: none;
             border-radius: 16px;
+            font-family: inherit;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            color: white;
+            position: relative;
+            overflow: hidden;
         }
 
-        button:hover {
-            background: var(--primary);
+        .action-btn.primary {
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            box-shadow: 0 8px 30px var(--accent-glow);
+        }
+
+        .action-btn.primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
         }
 
-        button:active { transform: translateY(0); }
-
-        .status-badge {
-            margin-top: 32px;
-            padding: 8px 16px;
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-            border-radius: 100px;
-            font-size: 12px;
-            display: inline-block;
+        .action-btn.success {
+            background: linear-gradient(135deg, var(--success), #059669);
+            box-shadow: 0 8px 30px var(--success-glow);
         }
 
-        #notification {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 24px;
-            border-radius: 12px;
+        .action-btn.success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
+        }
+
+        .action-btn.warning {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            box-shadow: 0 8px 30px var(--warning-glow);
+        }
+
+        .action-btn:active { transform: scale(0.97); }
+
+        .action-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .action-btn .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: scale(0);
+            animation: ripple 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        /* === SUMMARY (shown after completed) === */
+        .summary {
+            width: 100%;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px 24px;
             display: none;
+        }
+
+        .summary.show { display: block; }
+
+        .summary h3 {
+            font-size: 14px; font-weight: 600;
+            color: var(--text-dim); margin-bottom: 12px;
+        }
+
+        .summary-row {
+            display: flex; justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .summary-row:last-child { border-bottom: none; }
+        .summary-row .label { color: var(--text-muted); }
+        .summary-row .value { font-weight: 600; color: var(--text); }
+        .summary-row.total .value { color: var(--success); font-size: 15px; }
+
+        /* === NEXT NOTIFICATION BADGE === */
+        .next-badge {
+            display: none;
+            align-items: center; gap: 8px;
+            padding: 10px 18px;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.15);
+            border-radius: 12px;
+            font-size: 13px;
+            color: var(--warning);
+        }
+        .next-badge.show { display: flex; }
+        .next-badge .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--warning);
+            animation: pulse-dot 1.5s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* === TOAST === */
+        .toast {
+            position: fixed;
+            top: 20px; left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-size: 14px; font-weight: 500;
             z-index: 100;
+            transition: transform 0.4s ease;
+            backdrop-filter: blur(20px);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+        }
+        .toast.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+        }
+
+        @media (max-width: 480px) {
+            .clock { font-size: 44px; }
+            .container { gap: 20px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>PointCentral</h1>
-        <p class="subtitle">Assistente de Jornada Dinâmica</p>
-        
-        <div class="clock" id="clock">00:00:00</div>
-
-        <div class="btn-group">
-            <button onclick="logEvent('entry')">🚀 Registrar Entrada</button>
-            <button onclick="logEvent('lunchOut')">🍴 Saída Almoço</button>
-            <button onclick="logEvent('lunchIn')">🔙 Retorno Almoço</button>
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">⏱</div>
+            <h1>PointCentral</h1>
+            <p class="subtitle">Controle de Jornada Dinâmico</p>
         </div>
 
-        <div class="status-badge" id="status">Aguardando registro...</div>
+        <!-- Clock -->
+        <div>
+            <div class="clock" id="clock">--:--:--</div>
+            <div class="clock-date" id="clock-date"></div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline">
+            <div class="timeline-steps">
+                <div class="timeline-track"><div class="timeline-progress" id="progress"></div></div>
+                <div class="step" id="s-entry">
+                    <span class="step-time" id="t-entry"></span>
+                    <div class="step-circle">🚀</div>
+                    <span class="step-label">Entrada</span>
+                </div>
+                <div class="step" id="s-lunch">
+                    <span class="step-time" id="t-lunch"></span>
+                    <div class="step-circle">🍴</div>
+                    <span class="step-label">Almoço</span>
+                </div>
+                <div class="step" id="s-return">
+                    <span class="step-time" id="t-return"></span>
+                    <div class="step-circle">🔙</div>
+                    <span class="step-label">Retorno</span>
+                </div>
+                <div class="step" id="s-exit">
+                    <span class="step-time" id="t-exit"></span>
+                    <div class="step-circle">🏠</div>
+                    <span class="step-label">Saída</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Next notification -->
+        <div class="next-badge" id="next-badge">
+            <span class="dot"></span>
+            <span>Próxima notificação: <strong id="next-time">--:--</strong></span>
+        </div>
+
+        <!-- Action Card -->
+        <div class="action-card">
+            <p class="status-text" id="status-text">Carregando...</p>
+            <button class="action-btn primary" id="action-btn" onclick="registerTime()" disabled>
+                <span id="btn-icon">⏳</span>
+                <span id="btn-label">Carregando...</span>
+            </button>
+        </div>
+
+        <!-- Summary (after completed) -->
+        <div class="summary" id="summary">
+            <h3>📊 Resumo do Dia</h3>
+            <div class="summary-row"><span class="label">🚀 Entrada</span><span class="value" id="sum-entry">--</span></div>
+            <div class="summary-row"><span class="label">🍴 Saída Almoço</span><span class="value" id="sum-lunch">--</span></div>
+            <div class="summary-row"><span class="label">🔙 Retorno</span><span class="value" id="sum-return">--</span></div>
+            <div class="summary-row"><span class="label">🏠 Saída</span><span class="value" id="sum-exit">--</span></div>
+            <div class="summary-row total"><span class="label">⏱ Total</span><span class="value" id="sum-total">--</span></div>
+        </div>
     </div>
 
+    <div class="toast" id="toast"></div>
+
     <script>
+        const $ = id => document.getElementById(id);
+
+        // Clock
         function updateClock() {
             const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('pt-BR');
+            $('clock').textContent = now.toLocaleTimeString('pt-BR');
+            $('clock-date').textContent = now.toLocaleDateString('pt-BR', {
+                weekday: 'long', day: 'numeric', month: 'long'
+            });
         }
         setInterval(updateClock, 1000);
         updateClock();
 
-        async function logEvent(type) {
-            const status = document.getElementById('status');
-            status.innerText = 'Processando...';
-            try {
-                const res = await fetch(`/api/log/${type}`, { method: 'POST' });
-                const data = await res.json();
-                status.innerText = data.message;
-                alert('Sucesso! Notificação enviada para o WhatsApp.');
-            } catch (err) {
-                status.innerText = 'Erro ao registrar.';
-                alert('Erro na conexão.');
+        // Toast
+        function showToast(msg, type = 'success') {
+            const t = $('toast');
+            t.textContent = msg;
+            t.className = `toast ${type} show`;
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // Button configs per state
+        const BTN_CONFIG = {
+            'IDLE':                 { icon: '🚀', label: 'Registrar Entrada',       cls: 'primary',  enabled: true },
+            'AWAITING_ENTRY':       { icon: '🚀', label: 'Registrar Entrada',       cls: 'primary',  enabled: true },
+            'WAITING_LUNCH_OUT':    { icon: '⏳', label: 'Aguardando Almoço...',     cls: 'warning',  enabled: false },
+            'AWAITING_LUNCH_OUT':   { icon: '🍴', label: 'Registrar Saída Almoço',  cls: 'warning',  enabled: true },
+            'WAITING_LUNCH_RETURN': { icon: '⏳', label: 'Aguardando Retorno...',    cls: 'warning',  enabled: false },
+            'AWAITING_LUNCH_RETURN':{ icon: '🔙', label: 'Registrar Retorno',       cls: 'success',  enabled: true },
+            'WAITING_FINAL_EXIT':   { icon: '⏳', label: 'Aguardando Saída...',      cls: 'warning',  enabled: false },
+            'AWAITING_FINAL_EXIT':  { icon: '🏠', label: 'Registrar Saída',         cls: 'success',  enabled: true },
+            'COMPLETED':            { icon: '✅', label: 'Jornada Finalizada',       cls: 'success',  enabled: false },
+        };
+
+        const STATUS_TEXT = {
+            'IDLE':                 'Pressione o botão para registrar sua <strong>entrada</strong>.',
+            'AWAITING_ENTRY':       'Pressione o botão para registrar sua <strong>entrada</strong>.',
+            'WAITING_LUNCH_OUT':    'Entrada registrada! Você será notificado para o <strong>almoço</strong>.',
+            'AWAITING_LUNCH_OUT':   '🔔 Hora do almoço! Registre sua <strong>saída para almoço</strong>.',
+            'WAITING_LUNCH_RETURN': 'Saída registrada! Você será notificado para o <strong>retorno</strong>.',
+            'AWAITING_LUNCH_RETURN':'🔔 Hora de voltar! Registre seu <strong>retorno do almoço</strong>.',
+            'WAITING_FINAL_EXIT':   'Retorno registrado! Você será notificado para a <strong>saída</strong>.',
+            'AWAITING_FINAL_EXIT':  '🔔 Fim do expediente! Registre sua <strong>saída final</strong>.',
+            'COMPLETED':            '🎉 Jornada do dia <strong>finalizada</strong>. Descanse bem!',
+        };
+
+        function updateUI(state) {
+            const cfg = BTN_CONFIG[state.status] || BTN_CONFIG['IDLE'];
+
+            // Button
+            $('btn-icon').textContent = cfg.icon;
+            $('btn-label').textContent = cfg.label;
+            $('action-btn').className = `action-btn ${cfg.cls}`;
+            $('action-btn').disabled = !cfg.enabled;
+
+            // Status
+            $('status-text').innerHTML = STATUS_TEXT[state.status] || '';
+
+            // Timeline
+            const steps = [
+                { el: 's-entry',  time: 't-entry',  value: state.entryTime },
+                { el: 's-lunch',  time: 't-lunch',  value: state.lunchOutTime },
+                { el: 's-return', time: 't-return', value: state.lunchReturnTime },
+                { el: 's-exit',   time: 't-exit',   value: state.exitTime },
+            ];
+
+            const stateOrder = ['IDLE','AWAITING_ENTRY','WAITING_LUNCH_OUT','AWAITING_LUNCH_OUT',
+                'WAITING_LUNCH_RETURN','AWAITING_LUNCH_RETURN','WAITING_FINAL_EXIT','AWAITING_FINAL_EXIT','COMPLETED'];
+            const idx = stateOrder.indexOf(state.status);
+            const doneAt = [2, 4, 6, 8];
+            const activeAt = [1, 3, 5, 7];
+            const waitAt = [2, 4, 6]; // waiting states
+
+            let doneCount = 0;
+            steps.forEach((s, i) => {
+                const el = $(s.el);
+                el.className = 'step';
+                if (idx >= doneAt[i]) { el.classList.add('done'); doneCount++; }
+                else if (idx >= activeAt[i]) el.classList.add('active');
+
+                $(s.time).textContent = s.value || '';
+            });
+
+            // Progress bar
+            $('progress').style.width = `${(doneCount / 4) * 100}%`;
+
+            // Next badge
+            if (state.nextNotificationAt && ['WAITING_LUNCH_OUT','WAITING_LUNCH_RETURN','WAITING_FINAL_EXIT'].includes(state.status)) {
+                $('next-badge').classList.add('show');
+                $('next-time').textContent = state.nextNotificationAt;
+            } else {
+                $('next-badge').classList.remove('show');
+            }
+
+            // Summary
+            if (state.status === 'COMPLETED') {
+                $('summary').classList.add('show');
+                $('sum-entry').textContent = state.entryTime || '--';
+                $('sum-lunch').textContent = state.lunchOutTime || '--';
+                $('sum-return').textContent = state.lunchReturnTime || '--';
+                $('sum-exit').textContent = state.exitTime || '--';
+
+                // Calculate total
+                if (state.entryTime && state.lunchOutTime && state.lunchReturnTime && state.exitTime) {
+                    const toMin = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+                    const morning = toMin(state.lunchOutTime) - toMin(state.entryTime);
+                    const afternoon = toMin(state.exitTime) - toMin(state.lunchReturnTime);
+                    const total = morning + afternoon;
+                    const h = Math.floor(total / 60);
+                    const m = total % 60;
+                    $('sum-total').textContent = `${h}h${m.toString().padStart(2,'0')}min`;
+                }
+            } else {
+                $('summary').classList.remove('show');
             }
         }
+
+        // Fetch state
+        async function loadState() {
+            try {
+                const res = await fetch('/api/state');
+                const { state } = await res.json();
+                updateUI(state);
+            } catch (err) {
+                console.error('Load error:', err);
+            }
+        }
+
+        // Senior platform URL
+        const SENIOR_URL = 'https://platform.senior.com.br/senior-x/#/Gest%C3%A3o%20de%20Pessoas%20%7C%20HCM/1/res:%2F%2Fsenior.com.br%2Fhcm%2Fpontomobile%2FclockingEvent?category=frame&link=https:%2F%2Fplatform.senior.com.br%2Fhcm-pontomobile%2Fhcm%2Fpontomobile%2F%23%2Fclocking-event&withCredentials=true&r=1';
+
+        // Register time (button click) + open Senior platform
+        async function registerTime() {
+            const btn = $('action-btn');
+            btn.disabled = true;
+
+            // Ripple effect
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            ripple.style.width = ripple.style.height = '100px';
+            ripple.style.left = '50%'; ripple.style.top = '50%';
+            ripple.style.marginLeft = '-50px'; ripple.style.marginTop = '-50px';
+            btn.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+
+            try {
+                // Open Senior platform in new tab
+                window.open(SENIOR_URL, '_blank');
+
+                // Register time on the server
+                const res = await fetch('/api/register', { method: 'POST' });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast(data.message.split('.')[0] + '.', 'success');
+                    updateUI(data.newState);
+                } else {
+                    showToast(data.message || data.error, 'error');
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                showToast('Erro de conexão.', 'error');
+                btn.disabled = false;
+            }
+        }
+
+        // Poll state every 30s to catch server-side notifications
+        setInterval(loadState, 30000);
+
+        // Request browser notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // Init
+        loadState();
     </script>
 </body>
 </html>

@@ -44,17 +44,5 @@ class StorageService {
             this.save();
         }
     }
-    /**
-     * Cleanup old entries to keep the file small (e.g., keep only last 30 days)
-     */
-    cleanup() {
-        const dates = Object.keys(this.data);
-        if (dates.length > 30) {
-            const sortedDates = dates.sort();
-            const toRemove = sortedDates.slice(0, sortedDates.length - 30);
-            toRemove.forEach(date => delete this.data[date]);
-            this.save();
-        }
-    }
 }
 exports.default = new StorageService();

@@ -1,17 +1,34 @@
 import dotenv from 'dotenv';
 import express from 'express';
+import path from 'path';
 import logger from './logger';
 import scheduler from './scheduler';
+import apiRoutes from './api-routes';
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.get('/', (req, res) => res.send('Point Notification System is active! 🤖'));
-app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from public/
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// API routes
+app.use(apiRoutes);
+
+// Health check
+app.get('/health', (_req, res) => res.status(200).json({ status: 'ok' }));
+
+// Fallback: serve index.html for any non-API route (SPA behavior)
+app.get('/{*path}', (_req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
 
 app.listen(Number(port), '0.0.0.0', () => {
-  logger.info(`🚀 Health check server listening on port ${port}`);
+  logger.info(`🚀 PointCentral server listening on port ${port}`);
   scheduler.start();
 });
