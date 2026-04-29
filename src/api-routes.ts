@@ -23,7 +23,18 @@ router.post('/api/register', async (_req: Request, res: Response) => {
     // Se o registro foi com sucesso, envia confirmação + previsão via WhatsApp
     if (result.success) {
       const appUrl = process.env.APP_URL || 'http://localhost:3000';
-      const wppMsg = `✅ *Ponto Registrado!*\n\n${result.message}\n\n👉 Acesse: ${appUrl}`;
+      let wppMsg = '';
+
+      if (result.isBreak) {
+        // Mensagem customizada para saídas/retornos não previstos
+        wppMsg = result.message.includes('Saída não prevista') 
+          ? `⚠️ *Saída não prevista registrada!*\n\n${result.message}\n\n👉 Acesse para registrar o retorno: ${appUrl}`
+          : `✅ *Retorno registrado!*\n\n${result.message}\n\n👉 Acesse: ${appUrl}`;
+      } else {
+        // Mensagem padrão para marcos oficiais
+        wppMsg = `✅ *Ponto Registrado!*\n\n${result.message}\n\n👉 Acesse: ${appUrl}`;
+      }
+
       // Não bloqueia a requisição HTTP aguardando o envio do WhatsApp (fire-and-forget)
       whatsapp.sendRawMessage(wppMsg).catch(err => logger.error('Error sending confirmation whatsapp:', err));
     }

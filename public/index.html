@@ -467,24 +467,26 @@
         const BTN_CONFIG = {
             'IDLE':                 { icon: '🚀', label: 'Registrar Entrada',       cls: 'primary',  enabled: true },
             'AWAITING_ENTRY':       { icon: '🚀', label: 'Registrar Entrada',       cls: 'primary',  enabled: true },
-            'WAITING_LUNCH_OUT':    { icon: '⏳', label: 'Aguardando Almoço...',     cls: 'warning',  enabled: false },
+            'WAITING_LUNCH_OUT':    { icon: '☕', label: 'Saída não prevista',     cls: 'warning',  enabled: true },
             'AWAITING_LUNCH_OUT':   { icon: '🍴', label: 'Registrar Saída Almoço',  cls: 'warning',  enabled: true },
-            'WAITING_LUNCH_RETURN': { icon: '⏳', label: 'Aguardando Retorno...',    cls: 'warning',  enabled: false },
+            'WAITING_LUNCH_RETURN': { icon: '☕', label: 'Saída não prevista',     cls: 'warning',  enabled: true },
             'AWAITING_LUNCH_RETURN':{ icon: '🔙', label: 'Registrar Retorno',       cls: 'success',  enabled: true },
-            'WAITING_FINAL_EXIT':   { icon: '⏳', label: 'Aguardando Saída...',      cls: 'warning',  enabled: false },
+            'WAITING_FINAL_EXIT':   { icon: '☕', label: 'Saída não prevista',     cls: 'warning',  enabled: true },
             'AWAITING_FINAL_EXIT':  { icon: '🏠', label: 'Registrar Saída',         cls: 'success',  enabled: true },
+            'IN_BREAK':             { icon: '🔙', label: 'Registrar Retorno',       cls: 'success',  enabled: true },
             'COMPLETED':            { icon: '✅', label: 'Jornada Finalizada',       cls: 'success',  enabled: false },
         };
 
         const STATUS_TEXT = {
             'IDLE':                 'Pressione o botão para registrar sua <strong>entrada</strong>.',
             'AWAITING_ENTRY':       'Pressione o botão para registrar sua <strong>entrada</strong>.',
-            'WAITING_LUNCH_OUT':    'Entrada registrada! Você será notificado para o <strong>almoço</strong>.',
+            'WAITING_LUNCH_OUT':    'Entrada registrada! Aguardando o horário do <strong>almoço</strong>.',
             'AWAITING_LUNCH_OUT':   '🔔 Hora do almoço! Registre sua <strong>saída para almoço</strong>.',
-            'WAITING_LUNCH_RETURN': 'Saída registrada! Você será notificado para o <strong>retorno</strong>.',
+            'WAITING_LUNCH_RETURN': 'Saída registrada! Aguardando o horário do <strong>retorno</strong>.',
             'AWAITING_LUNCH_RETURN':'🔔 Hora de voltar! Registre seu <strong>retorno do almoço</strong>.',
-            'WAITING_FINAL_EXIT':   'Retorno registrado! Você será notificado para a <strong>saída</strong>.',
+            'WAITING_FINAL_EXIT':   'Retorno registrado! Aguardando o horário da <strong>saída</strong>.',
             'AWAITING_FINAL_EXIT':  '🔔 Fim do expediente! Registre sua <strong>saída final</strong>.',
+            'IN_BREAK':             '⚠️ Você está em uma <strong>saída não prevista</strong>. Registre o retorno ao voltar.',
             'COMPLETED':            '🎉 Jornada do dia <strong>finalizada</strong>. Descanse bem!',
         };
 
@@ -510,10 +512,14 @@
 
             const stateOrder = ['IDLE','AWAITING_ENTRY','WAITING_LUNCH_OUT','AWAITING_LUNCH_OUT',
                 'WAITING_LUNCH_RETURN','AWAITING_LUNCH_RETURN','WAITING_FINAL_EXIT','AWAITING_FINAL_EXIT','COMPLETED'];
-            const idx = stateOrder.indexOf(state.status);
+            
+            // Map IN_BREAK to its suspended status for timeline purposes
+            let displayStatus = state.status;
+            if (displayStatus === 'IN_BREAK') displayStatus = state.suspendedStatus;
+            
+            const idx = stateOrder.indexOf(displayStatus);
             const doneAt = [2, 4, 6, 8];
             const activeAt = [1, 3, 5, 7];
-            const waitAt = [2, 4, 6]; // waiting states
 
             let doneCount = 0;
             steps.forEach((s, i) => {
@@ -529,12 +535,19 @@
             $('progress').style.width = `${(doneCount / 4) * 100}%`;
 
             // Next badge
-            if (state.nextNotificationAt && ['WAITING_LUNCH_OUT','WAITING_LUNCH_RETURN','WAITING_FINAL_EXIT'].includes(state.status)) {
+            if (state.nextNotificationAt && ['WAITING_LUNCH_OUT','WAITING_LUNCH_RETURN','WAITING_FINAL_EXIT'].includes(displayStatus)) {
                 $('next-badge').classList.add('show');
                 $('next-time').textContent = state.nextNotificationAt;
             } else {
                 $('next-badge').classList.remove('show');
             }
+
+            // Calculate total break minutes
+            const toMin = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+            const breakMin = (state.breaks || []).reduce((acc, b) => {
+                if (b.out && b.return) return acc + (toMin(b.return) - toMin(b.out));
+                return acc;
+            }, 0);
 
             // Summary
             if (state.status === 'COMPLETED') {
@@ -544,15 +557,21 @@
                 $('sum-return').textContent = state.lunchReturnTime || '--';
                 $('sum-exit').textContent = state.exitTime || '--';
 
-                // Calculate total
+                // Calculate total worked
                 if (state.entryTime && state.lunchOutTime && state.lunchReturnTime && state.exitTime) {
-                    const toMin = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
                     const morning = toMin(state.lunchOutTime) - toMin(state.entryTime);
                     const afternoon = toMin(state.exitTime) - toMin(state.lunchReturnTime);
-                    const total = morning + afternoon;
+                    const total = morning + afternoon - breakMin;
                     const h = Math.floor(total / 60);
                     const m = total % 60;
-                    $('sum-total').textContent = `${h}h${m.toString().padStart(2,'0')}min`;
+                    
+                    let totalStr = `${h}h${m.toString().padStart(2,'0')}min`;
+                    if (breakMin > 0) {
+                        const bh = Math.floor(breakMin / 60);
+                        const bm = breakMin % 60;
+                        totalStr += ` (Ausência: ${bh}h${bm.toString().padStart(2,'0')}min)`;
+                    }
+                    $('sum-total').textContent = totalStr;
                 }
             } else {
                 $('summary').classList.remove('show');

@@ -13,6 +13,7 @@ export type DayStatus =
   | 'AWAITING_LUNCH_RETURN'
   | 'WAITING_FINAL_EXIT'
   | 'AWAITING_FINAL_EXIT'
+  | 'IN_BREAK'
   | 'COMPLETED';
 
 export interface DayState {
@@ -24,6 +25,8 @@ export interface DayState {
   exitTime: string | null;
   nextNotificationAt: string | null;
   completedAt: string | null;
+  breaks: { out: string; return: string | null }[];
+  suspendedStatus: DayStatus | null;
 }
 
 export interface ActionResult {
@@ -31,6 +34,7 @@ export interface ActionResult {
   message: string;
   newState: DayState;
   error?: string;
+  isBreak?: boolean;
 }
 
 class StateMachine {
@@ -49,6 +53,7 @@ class StateMachine {
       entryTime: null, lunchOutTime: null,
       lunchReturnTime: null, exitTime: null,
       nextNotificationAt: null, completedAt: null,
+      breaks: [], suspendedStatus: null,
     };
   }
 
@@ -57,7 +62,11 @@ class StateMachine {
       if (fs.existsSync(this.stateFilePath)) {
         const content = fs.readFileSync(this.stateFilePath, 'utf-8');
         const saved = JSON.parse(content) as DayState;
-        if (saved.date === this.getToday()) return saved;
+        if (saved.date === this.getToday()) {
+          // Ensure breaks array exists for legacy states
+          if (!saved.breaks) saved.breaks = [];
+          return saved;
+        }
         logger.info(`Day changed (${saved.date} → ${this.getToday()}). Resetting state.`);
       }
     } catch (err) {
@@ -117,10 +126,6 @@ class StateMachine {
 
     switch (this.state.status) {
       case 'IDLE':
-        // Auto-start + register entry
-        this.state.status = 'AWAITING_ENTRY';
-        return this.registerEntry(now);
-
       case 'AWAITING_ENTRY':
         return this.registerEntry(now);
 
@@ -136,11 +141,11 @@ class StateMachine {
       case 'WAITING_LUNCH_OUT':
       case 'WAITING_LUNCH_RETURN':
       case 'WAITING_FINAL_EXIT':
-        return {
-          success: false,
-          message: `Aguardando próxima etapa às ${this.state.nextNotificationAt}.`,
-          newState: this.getState(),
-        };
+        // Interval click -> Unscheduled Break
+        return this.registerBreakOut(now);
+
+      case 'IN_BREAK':
+        return this.registerBreakReturn(now);
 
       case 'COMPLETED':
         return {
@@ -156,42 +161,39 @@ class StateMachine {
 
   private registerEntry(time: string): ActionResult {
     this.state.entryTime = time;
-    const lunch = calculator.calculateLunchOut(time);
     this.state.status = 'WAITING_LUNCH_OUT';
-    this.state.nextNotificationAt = lunch.horarioAlvo;
+    this.recalculateTargets();
     this.saveState();
 
     return {
       success: true,
-      message: `Entrada registrada: ${time}. Almoço previsto: ${lunch.horarioAlvo}.`,
+      message: `Entrada registrada: ${time}. Próximo passo: Almoço.`,
       newState: this.getState(),
     };
   }
 
   private registerLunchOut(time: string): ActionResult {
     this.state.lunchOutTime = time;
-    const ret = calculator.calculateLunchReturn(time);
     this.state.status = 'WAITING_LUNCH_RETURN';
-    this.state.nextNotificationAt = ret.horarioAlvo;
+    this.recalculateTargets();
     this.saveState();
 
     return {
       success: true,
-      message: `Saída almoço registrada: ${time}. Retorno previsto: ${ret.horarioAlvo}.`,
+      message: `Saída almoço registrada: ${time}. Próximo passo: Retorno.`,
       newState: this.getState(),
     };
   }
 
   private registerLunchReturn(time: string): ActionResult {
     this.state.lunchReturnTime = time;
-    const exit = calculator.calculateFinalExit(this.state.entryTime!, this.state.lunchOutTime!, time);
     this.state.status = 'WAITING_FINAL_EXIT';
-    this.state.nextNotificationAt = exit.horarioAlvo;
+    this.recalculateTargets();
     this.saveState();
 
     return {
       success: true,
-      message: `Retorno registrado: ${time}. Saída prevista: ${exit.horarioAlvo}.`,
+      message: `Retorno registrado: ${time}. Próximo passo: Saída Final.`,
       newState: this.getState(),
     };
   }
@@ -203,9 +205,11 @@ class StateMachine {
     this.state.completedAt = time;
     this.saveState();
 
+    const breakMinutes = calculator.calculateTotalBreakMinutes(this.state.breaks);
     const summary = calculator.getDaySummary(
       this.state.entryTime!, this.state.lunchOutTime!,
       this.state.lunchReturnTime!, time,
+      breakMinutes
     );
 
     return {
@@ -213,6 +217,64 @@ class StateMachine {
       message: `Saída registrada: ${time}. Jornada finalizada!\n${summary}`,
       newState: this.getState(),
     };
+  }
+
+  private registerBreakOut(time: string): ActionResult {
+    this.state.suspendedStatus = this.state.status;
+    this.state.status = 'IN_BREAK';
+    this.state.breaks.push({ out: time, return: null });
+    this.saveState();
+
+    return {
+      success: true,
+      isBreak: true,
+      message: `⚠️ Saída não prevista registrada às ${time}. Registre o retorno ao voltar.`,
+      newState: this.getState(),
+    };
+  }
+
+  private registerBreakReturn(time: string): ActionResult {
+    const lastBreak = this.state.breaks[this.state.breaks.length - 1];
+    if (lastBreak) {
+      lastBreak.return = time;
+    }
+
+    this.state.status = this.state.suspendedStatus || 'WAITING_LUNCH_OUT';
+    this.state.suspendedStatus = null;
+    
+    // Recalcular os horários previstos com base no novo tempo de ausência total
+    this.recalculateTargets();
+    this.saveState();
+
+    const totalBreakMin = calculator.calculateTotalBreakMinutes(this.state.breaks);
+    return {
+      success: true,
+      isBreak: true,
+      message: `✅ Retorno registrado às ${time}. Total ausente hoje: ${calculator.formatMinutes(totalBreakMin)}.`,
+      newState: this.getState(),
+    };
+  }
+
+  private recalculateTargets() {
+    const breakMin = calculator.calculateTotalBreakMinutes(this.state.breaks);
+
+    if (this.state.status === 'WAITING_LUNCH_OUT') {
+      const res = calculator.calculateLunchOut(this.state.entryTime!, breakMin);
+      this.state.nextNotificationAt = res.horarioAlvo;
+    } 
+    else if (this.state.status === 'WAITING_LUNCH_RETURN') {
+      const res = calculator.calculateLunchReturn(this.state.lunchOutTime!);
+      this.state.nextNotificationAt = res.horarioAlvo;
+    }
+    else if (this.state.status === 'WAITING_FINAL_EXIT') {
+      const res = calculator.calculateFinalExit(
+        this.state.entryTime!, 
+        this.state.lunchOutTime!, 
+        this.state.lunchReturnTime!,
+        breakMin
+      );
+      this.state.nextNotificationAt = res.horarioAlvo;
+    }
   }
 
   /** Called by the scheduler when a timer fires */

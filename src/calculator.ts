@@ -18,21 +18,33 @@ class TimeCalculator {
   }
 
   /**
-   * Calcula quando deve ser o almoço com base na entrada (50% da jornada = 4h24)
+   * Soma o total de minutos ausentes em saídas não previstas
    */
-  public calculateLunchOut(entryTime: string): CalculationResult {
+  public calculateTotalBreakMinutes(breaks: { out: string, return: string | null }[]): number {
+    return breaks.reduce((total, b) => {
+      if (!b.out || !b.return) return total;
+      const out = this.parseTime(b.out);
+      const ret = this.parseTime(b.return);
+      return total + ret.diff(out, 'minutes').minutes;
+    }, 0);
+  }
+
+  /**
+   * Calcula quando deve ser o almoço com base na entrada + breaks acumulados
+   */
+  public calculateLunchOut(entryTime: string, breakMinutes: number = 0): CalculationResult {
     const entry = this.parseTime(entryTime);
-    const lunchOut = entry.plus({ minutes: MEIA_JORNADA_MINUTOS });
+    const lunchOut = entry.plus({ minutes: MEIA_JORNADA_MINUTOS + breakMinutes });
 
     return {
       proximoEvento: 'Saída para Almoço',
       horarioAlvo: lunchOut.toFormat('HH:mm'),
-      mensagem: `Entrada registrada: ${entryTime}.\n📍 Saída para almoço prevista: ${lunchOut.toFormat('HH:mm')}`,
+      mensagem: `Entrada registrada: ${entryTime}.${breakMinutes > 0 ? ` (Ausência: ${this.formatMinutes(breakMinutes)})` : ''}\n📍 Saída para almoço prevista: ${lunchOut.toFormat('HH:mm')}`,
     };
   }
 
   /**
-   * Calcula o horário de retorno do almoço (saída almoço + 1h)
+   * Calcula o horário de retorno do almoço
    */
   public calculateLunchReturn(lunchOutTime: string): CalculationResult {
     const lOut = this.parseTime(lunchOutTime);
@@ -46,28 +58,39 @@ class TimeCalculator {
   }
 
   /**
-   * Calcula a saída final com base no tempo real trabalhado na manhã
+   * Calcula a saída final com base no tempo trabalhado e breaks totais
    */
-  public calculateFinalExit(entryTime: string, lunchOutTime: string, lunchInTime: string): CalculationResult {
+  public calculateFinalExit(entryTime: string, lunchOutTime: string, lunchInTime: string, breakMinutes: number = 0): CalculationResult {
     const entry = this.parseTime(entryTime);
     const lOut = this.parseTime(lunchOutTime);
     const lIn = this.parseTime(lunchInTime);
 
     const minutosTrabalhadosManha = lOut.diff(entry, 'minutes').minutes;
+    // O tempo trabalhado na manhã já desconta os breaks que ocorreram ANTES do almoço, 
+    // mas precisamos garantir que o cálculo considere breaks que ocorreram DEPOIS do retorno do almoço também.
+    // Na verdade, a lógica mais simples é: 
+    // Saída Final = Retorno Almoço + (Jornada Total - Minutos Trabalhados Manhã) + Breaks da Tarde.
+    
     const minutosRestantes = JORNADA_TOTAL_MINUTOS - minutosTrabalhadosManha;
-    const finalExit = lIn.plus({ minutes: minutosRestantes });
+    const finalExit = lIn.plus({ minutes: minutosRestantes + breakMinutes });
 
     return {
       proximoEvento: 'Saída Final',
       horarioAlvo: finalExit.toFormat('HH:mm'),
-      mensagem: `✅ Você já trabalhou ${this.formatMinutes(minutosTrabalhadosManha)} pela manhã.\n🚀 Fim do expediente: **${finalExit.toFormat('HH:mm')}**`,
+      mensagem: `✅ Trabalhado manhã: ${this.formatMinutes(minutosTrabalhadosManha)}.${breakMinutes > 0 ? ` Ausência total: ${this.formatMinutes(breakMinutes)}.` : ''}\n🚀 Fim do expediente: **${finalExit.toFormat('HH:mm')}**`,
     };
   }
 
   /**
    * Generate a day summary after final exit
    */
-  public getDaySummary(entryTime: string, lunchOutTime: string, lunchReturnTime: string, exitTime: string): string {
+  public getDaySummary(
+    entryTime: string, 
+    lunchOutTime: string, 
+    lunchReturnTime: string, 
+    exitTime: string, 
+    breakMinutes: number = 0
+  ): string {
     const entry = this.parseTime(entryTime);
     const lOut = this.parseTime(lunchOutTime);
     const lIn = this.parseTime(lunchReturnTime);
@@ -76,7 +99,11 @@ class TimeCalculator {
     const morningMinutes = lOut.diff(entry, 'minutes').minutes;
     const lunchMinutes = lIn.diff(lOut, 'minutes').minutes;
     const afternoonMinutes = exit.diff(lIn, 'minutes').minutes;
-    const totalWorked = morningMinutes + afternoonMinutes;
+    
+    // totalWorked = (Tempo entre as marcações oficiais) - (tempo de breaks)
+    // Mas morningMinutes e afternoonMinutes aqui são calculados puramente entre os marcos.
+    // Então o tempo trabalhado REAL é a soma deles menos os breaks.
+    const totalWorked = morningMinutes + afternoonMinutes - breakMinutes;
 
     const lines = [
       `🕐 Entrada: ${entryTime}`,
@@ -87,8 +114,9 @@ class TimeCalculator {
       `⏱️ Manhã: ${this.formatMinutes(morningMinutes)}`,
       `🍽️ Almoço: ${this.formatMinutes(lunchMinutes)}`,
       `⏱️ Tarde: ${this.formatMinutes(afternoonMinutes)}`,
+      breakMinutes > 0 ? `☕ Ausências: ${this.formatMinutes(breakMinutes)}` : null,
       `📊 **Total trabalhado: ${this.formatMinutes(totalWorked)}**`,
-    ];
+    ].filter(Boolean) as string[];
 
     const diff = totalWorked - JORNADA_TOTAL_MINUTOS;
     if (diff > 0) {
@@ -102,7 +130,7 @@ class TimeCalculator {
     return lines.join('\n');
   }
 
-  private formatMinutes(totalMinutes: number): string {
+  public formatMinutes(totalMinutes: number): string {
     const h = Math.floor(Math.abs(totalMinutes) / 60);
     const m = Math.round(Math.abs(totalMinutes) % 60);
     return `${h}h${m.toString().padStart(2, '0')}min`;
