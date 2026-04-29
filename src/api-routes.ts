@@ -60,4 +60,15 @@ router.post('/api/test-whatsapp', async (_req: Request, res: Response) => {
   }
 });
 
+/** POST /api/skip — Skip the rest of the day */
+router.post('/api/skip', async (_req: Request, res: Response) => {
+  try {
+    const result = stateMachine.skipDay();
+    res.json(result);
+  } catch (err) {
+    logger.error('Error skipping day:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;

@@ -437,6 +437,10 @@
         <button class="action-btn" style="background: rgba(255,255,255,0.05); margin-top: 10px; padding: 12px; font-size: 13px; color: var(--text-dim); border: 1px dashed var(--border);" onclick="testWhatsapp()">
             📱 Testar WhatsApp
         </button>
+
+        <button class="action-btn" style="background: rgba(255,255,255,0.05); margin-top: 10px; padding: 12px; font-size: 13px; color: var(--text-dim); border: 1px dashed var(--border);" onclick="skipDay()">
+            ⏩ Pular Dia (Skip)
+        </button>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -474,6 +478,7 @@
             'WAITING_FINAL_EXIT':   { icon: '☕', label: 'Saída não prevista',     cls: 'warning',  enabled: true },
             'AWAITING_FINAL_EXIT':  { icon: '🏠', label: 'Registrar Saída',         cls: 'success',  enabled: true },
             'IN_BREAK':             { icon: '🔙', label: 'Registrar Retorno',       cls: 'success',  enabled: true },
+            'SKIPPED':              { icon: '⏩', label: 'Dia Pulado',              cls: 'secondary',enabled: false },
             'COMPLETED':            { icon: '✅', label: 'Jornada Finalizada',       cls: 'success',  enabled: false },
         };
 
@@ -487,6 +492,7 @@
             'WAITING_FINAL_EXIT':   'Retorno registrado! Aguardando o horário da <strong>saída</strong>.',
             'AWAITING_FINAL_EXIT':  '🔔 Fim do expediente! Registre sua <strong>saída final</strong>.',
             'IN_BREAK':             '⚠️ Você está em uma <strong>saída não prevista</strong>. Registre o retorno ao voltar.',
+            'SKIPPED':              '⏩ O dia atual foi <strong>ignorado</strong>. O sistema retornará amanhã às 07:00.',
             'COMPLETED':            '🎉 Jornada do dia <strong>finalizada</strong>. Descanse bem!',
         };
 
@@ -690,6 +696,23 @@
                 }
             } catch (err) {
                 showToast('Erro de conexão ao testar', 'error');
+            }
+        }
+
+        async function skipDay() {
+            if (!confirm('Tem certeza que deseja pular o restante do dia de hoje? As notificações serão silenciadas até amanhã às 07:00.')) return;
+            
+            try {
+                const res = await fetch('/api/skip', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Dia pulado. Retomaremos amanhã!', 'success');
+                    updateUI(data.newState);
+                } else {
+                    showToast('Erro ao pular dia', 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão ao pular dia', 'error');
             }
         }
     </script>

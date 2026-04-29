@@ -14,6 +14,7 @@ export type DayStatus =
   | 'WAITING_FINAL_EXIT'
   | 'AWAITING_FINAL_EXIT'
   | 'IN_BREAK'
+  | 'SKIPPED'
   | 'COMPLETED';
 
 export interface DayState {
@@ -305,6 +306,13 @@ class StateMachine {
   public isWeekday(): boolean {
     const now = DateTime.now().setZone(this.timezone);
     return now.weekday >= 1 && now.weekday <= 5;
+  }
+
+  public skipDay(): ActionResult {
+    this.state.status = 'SKIPPED';
+    this.state.nextNotificationAt = null;
+    this.saveState();
+    return { success: true, message: 'Dia pulado com sucesso. Retomaremos amanhã às 07:00.', newState: this.getState() };
   }
 
   public reset(): DayState {
