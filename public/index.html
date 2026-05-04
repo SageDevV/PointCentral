@@ -35,8 +35,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            justify-content: flex-start;
+            padding: 40px 0;
+            overflow-x: hidden;
+            overflow-y: auto;
             position: relative;
         }
 
@@ -879,6 +881,8 @@
                 if (data.success) {
                     showToast(data.message.split('.')[0] + '.', 'warning');
                     updateUI(data.newState);
+                    // Encaminhar para o link da Senior em nova aba
+                    window.open('https://platform.senior.com.br/hcm/point-mobile/', '_blank');
                 } else {
                     showToast(data.message || data.error, 'error');
                 }
