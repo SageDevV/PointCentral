@@ -6,3 +6,14 @@
 {"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-04-23T15:58:16.468Z"}
 {"level":"error","message":"CallMeBot returned status 203: <p>Message to: +5547992843977<p>Text to send: 🔔 Lembrete de ponto: TESTE_MANUAL<p style=\"color:red\"><b>APIKey is invalid.</b> Please create a new one or contact support if you lost it.","timestamp":"2026-04-23T15:58:38.581Z"}
 {"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-04-23T15:58:38.581Z"}
+{"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T18:41:31.112Z"}
+{"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T18:42:00.173Z"}
+{"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T18:47:44.934Z"}
+{"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T18:48:14.450Z"}
+{"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T18:49:08.485Z"}
+{"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T18:49:15.045Z"}
+{"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T18:53:45.224Z"}
+{"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T18:54:00.200Z"}
+{"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T19:04:50.851Z"}
+{"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T19:09:50.721Z"}
+{"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T19:10:00.123Z"}

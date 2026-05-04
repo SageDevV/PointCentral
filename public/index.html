@@ -360,9 +360,212 @@
             color: var(--danger);
         }
 
+        /* === MANUAL BUTTON === */
+        .manual-btn {
+            width: 100%;
+            padding: 14px 20px;
+            border: 1.5px dashed rgba(168, 85, 247, 0.35);
+            border-radius: 14px;
+            background: rgba(168, 85, 247, 0.06);
+            color: #c084fc;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .manual-btn:hover {
+            background: rgba(168, 85, 247, 0.12);
+            border-color: rgba(168, 85, 247, 0.5);
+            transform: translateY(-1px);
+        }
+        .manual-btn:active { transform: scale(0.98); }
+        .manual-btn:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* === MODAL OVERLAY === */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            width: 90%;
+            max-width: 380px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 24px;
+            padding: 32px 28px;
+            text-align: center;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-icon {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            border-radius: 18px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 8px 30px rgba(168, 85, 247, 0.3);
+            margin-bottom: 16px;
+        }
+
+        .modal h2 {
+            font-size: 20px; font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .modal .modal-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .modal .modal-step-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #c084fc;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .time-input-wrapper {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .time-input {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1.5px solid rgba(168, 85, 247, 0.25);
+            border-radius: 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text);
+            text-align: center;
+            letter-spacing: 2px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .time-input:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
+        }
+        /* Style the time input on webkit browsers */
+        .time-input::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.5;
+            cursor: pointer;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn.cancel {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+        }
+        .modal-btn.cancel:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-btn.confirm {
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            color: white;
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.3);
+        }
+        .modal-btn.confirm:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 28px rgba(168, 85, 247, 0.4);
+        }
+        .modal-btn.confirm:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* === MANUAL BADGE IN TIMELINE / SUMMARY === */
+        .manual-tag {
+            font-size: 10px;
+            color: #c084fc;
+            background: rgba(168, 85, 247, 0.12);
+            padding: 2px 6px;
+            border-radius: 6px;
+            margin-left: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* === BREAK BUTTON === */
+        .break-btn {
+            width: 100%;
+            margin-top: 12px;
+            padding: 12px 16px;
+            border: 1.5px dashed rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+            background: rgba(245, 158, 11, 0.06);
+            color: var(--warning);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .break-btn:hover {
+            background: rgba(245, 158, 11, 0.12);
+            border-color: rgba(245, 158, 11, 0.5);
+        }
+        .break-btn:active { transform: scale(0.98); }
+
         @media (max-width: 480px) {
             .clock { font-size: 44px; }
             .container { gap: 20px; }
+            .time-input { font-size: 24px; }
         }
     </style>
 </head>
@@ -421,6 +624,10 @@
                 <span id="btn-icon">⏳</span>
                 <span id="btn-label">Carregando...</span>
             </button>
+            <!-- Break button (only visible in WAITING_* and IN_BREAK states) -->
+            <button class="break-btn" id="break-btn" onclick="registerBreakAction()" style="display: none;">
+                ☕ Saída não prevista
+            </button>
         </div>
 
         <!-- Summary (after completed) -->
@@ -433,14 +640,36 @@
             <div class="summary-row total"><span class="label">⏱ Total</span><span class="value" id="sum-total">--</span></div>
         </div>
 
-        <!-- Botão de teste do WhatsApp -->
-        <button class="action-btn" style="background: rgba(255,255,255,0.05); margin-top: 10px; padding: 12px; font-size: 13px; color: var(--text-dim); border: 1px dashed var(--border);" onclick="testWhatsapp()">
-            📱 Testar WhatsApp
+        <!-- Manual Registration Button -->
+        <button class="manual-btn" id="manual-btn" onclick="openManualModal()" disabled>
+            ✏️ Registro Manual
+        </button>
+
+        <!-- Botão de resetar o dia -->
+        <button class="action-btn" style="background: rgba(239, 68, 68, 0.05); margin-top: 10px; padding: 12px; font-size: 13px; color: var(--danger); border: 1px dashed rgba(239, 68, 68, 0.3);" onclick="resetDay()">
+            🔄 Resetar o Dia
         </button>
 
         <button class="action-btn" style="background: rgba(255,255,255,0.05); margin-top: 10px; padding: 12px; font-size: 13px; color: var(--text-dim); border: 1px dashed var(--border);" onclick="skipDay()">
             ⏩ Pular Dia (Skip)
         </button>
+    </div>
+
+    <!-- Manual Registration Modal -->
+    <div class="modal-overlay" id="manual-modal">
+        <div class="modal">
+            <div class="modal-icon">✏️</div>
+            <h2>Registro Manual</h2>
+            <p class="modal-desc">Informe o horário exato em que a batida foi realizada externamente.</p>
+            <p class="modal-step-label" id="modal-step-label">Etapa: --</p>
+            <div class="time-input-wrapper">
+                <input type="time" class="time-input" id="manual-time-input" required>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeManualModal()">Cancelar</button>
+                <button class="modal-btn confirm" id="modal-confirm-btn" onclick="confirmManualRegistration()">Confirmar</button>
+            </div>
+        </div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -471,11 +700,11 @@
         const BTN_CONFIG = {
             'IDLE':                 { icon: '🚀', label: 'Registrar Entrada',       cls: 'primary',  enabled: true },
             'AWAITING_ENTRY':       { icon: '🚀', label: 'Registrar Entrada',       cls: 'primary',  enabled: true },
-            'WAITING_LUNCH_OUT':    { icon: '☕', label: 'Saída não prevista',     cls: 'warning',  enabled: true },
+            'WAITING_LUNCH_OUT':    { icon: '🍴', label: 'Registrar Saída Almoço',  cls: 'primary',  enabled: true },
             'AWAITING_LUNCH_OUT':   { icon: '🍴', label: 'Registrar Saída Almoço',  cls: 'warning',  enabled: true },
-            'WAITING_LUNCH_RETURN': { icon: '☕', label: 'Saída não prevista',     cls: 'warning',  enabled: true },
+            'WAITING_LUNCH_RETURN': { icon: '🔙', label: 'Registrar Retorno',       cls: 'primary',  enabled: true },
             'AWAITING_LUNCH_RETURN':{ icon: '🔙', label: 'Registrar Retorno',       cls: 'success',  enabled: true },
-            'WAITING_FINAL_EXIT':   { icon: '☕', label: 'Saída não prevista',     cls: 'warning',  enabled: true },
+            'WAITING_FINAL_EXIT':   { icon: '🏠', label: 'Registrar Saída',         cls: 'primary',  enabled: true },
             'AWAITING_FINAL_EXIT':  { icon: '🏠', label: 'Registrar Saída',         cls: 'success',  enabled: true },
             'IN_BREAK':             { icon: '🔙', label: 'Registrar Retorno',       cls: 'success',  enabled: true },
             'SKIPPED':              { icon: '⏩', label: 'Dia Pulado',              cls: 'secondary',enabled: false },
@@ -485,16 +714,42 @@
         const STATUS_TEXT = {
             'IDLE':                 'Pressione o botão para registrar sua <strong>entrada</strong>.',
             'AWAITING_ENTRY':       'Pressione o botão para registrar sua <strong>entrada</strong>.',
-            'WAITING_LUNCH_OUT':    'Entrada registrada! Aguardando o horário do <strong>almoço</strong>.',
+            'WAITING_LUNCH_OUT':    'Entrada registrada! Registre sua <strong>saída para almoço</strong> quando quiser.',
             'AWAITING_LUNCH_OUT':   '🔔 Hora do almoço! Registre sua <strong>saída para almoço</strong>.',
-            'WAITING_LUNCH_RETURN': 'Saída registrada! Aguardando o horário do <strong>retorno</strong>.',
+            'WAITING_LUNCH_RETURN': 'Saída registrada! Registre seu <strong>retorno</strong> quando voltar.',
             'AWAITING_LUNCH_RETURN':'🔔 Hora de voltar! Registre seu <strong>retorno do almoço</strong>.',
-            'WAITING_FINAL_EXIT':   'Retorno registrado! Aguardando o horário da <strong>saída</strong>.',
+            'WAITING_FINAL_EXIT':   'Retorno registrado! Registre sua <strong>saída</strong> quando sair.',
             'AWAITING_FINAL_EXIT':  '🔔 Fim do expediente! Registre sua <strong>saída final</strong>.',
             'IN_BREAK':             '⚠️ Você está em uma <strong>saída não prevista</strong>. Registre o retorno ao voltar.',
             'SKIPPED':              '⏩ O dia atual foi <strong>ignorado</strong>. O sistema retornará amanhã às 07:00.',
             'COMPLETED':            '🎉 Jornada do dia <strong>finalizada</strong>. Descanse bem!',
         };
+
+        // Map status to the current step name (for modal label)
+        const STEP_LABEL_MAP = {
+            'IDLE':                 'Entrada',
+            'AWAITING_ENTRY':       'Entrada',
+            'WAITING_LUNCH_OUT':    'Saída para Almoço',
+            'AWAITING_LUNCH_OUT':   'Saída para Almoço',
+            'WAITING_LUNCH_RETURN': 'Retorno do Almoço',
+            'AWAITING_LUNCH_RETURN':'Retorno do Almoço',
+            'WAITING_FINAL_EXIT':   'Saída Final',
+            'AWAITING_FINAL_EXIT':  'Saída Final',
+            'IN_BREAK':             'Retorno (saída não prevista)',
+        };
+
+        // States that show the break button
+        const BREAK_BTN_STATES = ['WAITING_LUNCH_OUT', 'WAITING_LUNCH_RETURN', 'WAITING_FINAL_EXIT', 'IN_BREAK'];
+
+        // States that allow manual registration
+        const MANUAL_ALLOWED = [
+            'IDLE', 'AWAITING_ENTRY',
+            'AWAITING_LUNCH_OUT', 'AWAITING_LUNCH_RETURN', 'AWAITING_FINAL_EXIT',
+            'WAITING_LUNCH_OUT', 'WAITING_LUNCH_RETURN', 'WAITING_FINAL_EXIT',
+            'IN_BREAK',
+        ];
+
+        let currentState = null;
 
         function updateUI(state) {
             const cfg = BTN_CONFIG[state.status] || BTN_CONFIG['IDLE'];
@@ -534,7 +789,14 @@
                 if (idx >= doneAt[i]) { el.classList.add('done'); doneCount++; }
                 else if (idx >= activeAt[i]) el.classList.add('active');
 
-                $(s.time).textContent = s.value || '';
+                // Show time with manual tag
+                const manualKeys = ['entry', 'lunchOut', 'lunchReturn', 'exit'];
+                const isManual = state.manualFlags && state.manualFlags[manualKeys[i]];
+                if (s.value) {
+                    $(s.time).innerHTML = s.value + (isManual ? ' <span class="manual-tag" title="Batida informada manualmente">✏️</span>' : '');
+                } else {
+                    $(s.time).textContent = '';
+                }
             });
 
             // Progress bar
@@ -558,10 +820,12 @@
             // Summary
             if (state.status === 'COMPLETED') {
                 $('summary').classList.add('show');
-                $('sum-entry').textContent = state.entryTime || '--';
-                $('sum-lunch').textContent = state.lunchOutTime || '--';
-                $('sum-return').textContent = state.lunchReturnTime || '--';
-                $('sum-exit').textContent = state.exitTime || '--';
+                const mf = state.manualFlags || {};
+                const manualSpan = '<span class="manual-tag" title="Batida informada manualmente">✏️</span>';
+                $('sum-entry').innerHTML = (state.entryTime || '--') + (mf.entry ? ' ' + manualSpan : '');
+                $('sum-lunch').innerHTML = (state.lunchOutTime || '--') + (mf.lunchOut ? ' ' + manualSpan : '');
+                $('sum-return').innerHTML = (state.lunchReturnTime || '--') + (mf.lunchReturn ? ' ' + manualSpan : '');
+                $('sum-exit').innerHTML = (state.exitTime || '--') + (mf.exit ? ' ' + manualSpan : '');
 
                 // Calculate total worked
                 if (state.entryTime && state.lunchOutTime && state.lunchReturnTime && state.exitTime) {
@@ -581,6 +845,48 @@
                 }
             } else {
                 $('summary').classList.remove('show');
+            }
+
+            // Manual button state
+            const manualBtn = $('manual-btn');
+            manualBtn.disabled = !MANUAL_ALLOWED.includes(state.status);
+
+            // Break button state
+            const breakBtn = $('break-btn');
+            if (BREAK_BTN_STATES.includes(state.status)) {
+                breakBtn.style.display = 'flex';
+                breakBtn.innerHTML = state.status === 'IN_BREAK' ? '🔙 Registrar Retorno (não previsto)' : '☕ Saída não prevista';
+            } else {
+                breakBtn.style.display = 'none';
+            }
+
+            // Store current state
+            currentState = state;
+        }
+
+        async function registerBreakAction() {
+            if (countdownActive) return;
+
+            const btn = $('break-btn');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = 'Processando...';
+
+            try {
+                const res = await fetch('/api/register-break', { method: 'POST' });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast(data.message.split('.')[0] + '.', 'warning');
+                    updateUI(data.newState);
+                } else {
+                    showToast(data.message || data.error, 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão.', 'error');
+            } finally {
+                btn.disabled = false;
+                if (btn.innerHTML === 'Processando...') btn.innerHTML = originalHTML;
             }
         }
 
@@ -685,17 +991,20 @@
 
         // Init
         loadState();
-        async function testWhatsapp() {
+        async function resetDay() {
+            if (!confirm('Tem certeza que deseja resetar todo o progresso do dia de hoje?')) return;
+            
             try {
-                const res = await fetch('/api/test-whatsapp', { method: 'POST' });
+                const res = await fetch('/api/reset', { method: 'POST' });
                 const data = await res.json();
                 if(data.success) {
-                    showToast('Mensagem enviada! Verifique seu WhatsApp.', 'success');
+                    showToast('Dia resetado com sucesso!', 'success');
+                    updateUI(data.newState);
                 } else {
-                    showToast('Falha ao enviar mensagem de teste', 'error');
+                    showToast('Falha ao resetar o dia', 'error');
                 }
             } catch (err) {
-                showToast('Erro de conexão ao testar', 'error');
+                showToast('Erro de conexão ao resetar', 'error');
             }
         }
 
@@ -715,6 +1024,73 @@
                 showToast('Erro de conexão ao pular dia', 'error');
             }
         }
+
+        // === MANUAL REGISTRATION ===
+        function openManualModal() {
+            if (!currentState) return;
+            const label = STEP_LABEL_MAP[currentState.status] || '--';
+            $('modal-step-label').textContent = `Etapa atual: ${label}`;
+            // Default to current time
+            const now = new Date();
+            const hh = now.getHours().toString().padStart(2, '0');
+            const mm = now.getMinutes().toString().padStart(2, '0');
+            $('manual-time-input').value = `${hh}:${mm}`;
+            $('manual-modal').classList.add('show');
+            setTimeout(() => $('manual-time-input').focus(), 300);
+        }
+
+        function closeManualModal() {
+            $('manual-modal').classList.remove('show');
+        }
+
+        async function confirmManualRegistration() {
+            const timeValue = $('manual-time-input').value;
+            if (!timeValue) {
+                showToast('Informe o horário.', 'error');
+                return;
+            }
+
+            // Format to HH:mm (input type="time" gives HH:mm or HH:mm:ss)
+            const time = timeValue.substring(0, 5);
+
+            const confirmBtn = $('modal-confirm-btn');
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Registrando...';
+
+            try {
+                const res = await fetch('/api/register-manual', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ time }),
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    closeManualModal();
+                    showToast(`✏️ ${data.message.split('.')[0]}.`, 'success');
+                    updateUI(data.newState);
+                } else {
+                    showToast(data.message || data.error, 'error');
+                }
+            } catch (err) {
+                showToast('Erro de conexão.', 'error');
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Confirmar';
+            }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && $('manual-modal').classList.contains('show')) {
+                closeManualModal();
+            }
+        });
+
+        // Close modal clicking outside
+        $('manual-modal').addEventListener('click', e => {
+            if (e.target === $('manual-modal')) closeManualModal();
+        });
     </script>
 </body>
 </html>

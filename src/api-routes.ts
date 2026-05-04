@@ -46,17 +46,60 @@ router.post('/api/register', async (_req: Request, res: Response) => {
   }
 });
 
-/** POST /api/test-whatsapp — Send a test message */
-router.post('/api/test-whatsapp', async (_req: Request, res: Response) => {
+/** POST /api/register-break — Register an unscheduled break out/return */
+router.post('/api/register-break', async (_req: Request, res: Response) => {
   try {
-    const appUrl = process.env.APP_URL || 'http://localhost:3000';
-    const wppMsg = `Teste: Link: ${appUrl}`;
-    
-    await whatsapp.sendRawMessage(wppMsg);
-    res.json({ success: true, message: 'Mensagem de teste enviada.' });
+    const result = stateMachine.registerBreak();
+
+    if (result.success) {
+      const appUrl = process.env.APP_URL || 'http://localhost:3000';
+      const wppMsg = result.isBreak
+        ? (result.message.includes('Saída não prevista')
+          ? `⚠️ *Saída não prevista registrada!*\n\n${result.message}\n\n👉 Acesse para registrar o retorno: ${appUrl}`
+          : `✅ *Retorno registrado!*\n\n${result.message}\n\n👉 Acesse: ${appUrl}`)
+        : `✅ *Ponto Registrado!*\n\n${result.message}\n\n👉 Acesse: ${appUrl}`;
+      whatsapp.sendRawMessage(wppMsg).catch(err => logger.error('Error sending break whatsapp:', err));
+    }
+
+    res.json(result);
   } catch (err) {
-    logger.error('Error sending test whatsapp:', err);
-    res.status(500).json({ error: 'Erro ao enviar mensagem' });
+    logger.error('Error registering break:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/** POST /api/register-manual — Register a manually informed time */
+router.post('/api/register-manual', async (req: Request, res: Response) => {
+  try {
+    const { time } = req.body;
+    if (!time || typeof time !== 'string') {
+      res.status(400).json({ error: 'Campo "time" é obrigatório (formato HH:mm).' });
+      return;
+    }
+
+    const result = stateMachine.registerManualTime(time);
+
+    if (result.success) {
+      const appUrl = process.env.APP_URL || 'http://localhost:3000';
+      const wppMsg = `✏️ *Ponto Manual Registrado!*\n\n${result.message}\n\n👉 Acesse: ${appUrl}`;
+      whatsapp.sendRawMessage(wppMsg).catch(err => logger.error('Error sending manual whatsapp:', err));
+    }
+
+    res.json(result);
+  } catch (err) {
+    logger.error('Error registering manual time:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/** POST /api/reset — Reset the day */
+router.post('/api/reset', async (_req: Request, res: Response) => {
+  try {
+    const newState = stateMachine.reset();
+    res.json({ success: true, message: 'Dia resetado com sucesso.', newState });
+  } catch (err) {
+    logger.error('Error resetting day:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

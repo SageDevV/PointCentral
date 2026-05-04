@@ -1,0 +1,15 @@
+{
+  "date": "2026-05-04",
+  "status": "AWAITING_FINAL_EXIT",
+  "entryTime": "07:00",
+  "lunchOutTime": "16:04",
+  "lunchReturnTime": "16:09",
+  "exitTime": null,
+  "nextNotificationAt": "15:53",
+  "completedAt": null,
+  "breaks": [],
+  "suspendedStatus": null,
+  "manualFlags": {
+    "entry": true
+  }
+}

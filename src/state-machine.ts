@@ -17,6 +17,13 @@ export type DayStatus =
   | 'SKIPPED'
   | 'COMPLETED';
 
+export interface ManualFlags {
+  entry?: boolean;
+  lunchOut?: boolean;
+  lunchReturn?: boolean;
+  exit?: boolean;
+}
+
 export interface DayState {
   date: string;
   status: DayStatus;
@@ -28,6 +35,7 @@ export interface DayState {
   completedAt: string | null;
   breaks: { out: string; return: string | null }[];
   suspendedStatus: DayStatus | null;
+  manualFlags: ManualFlags;
 }
 
 export interface ActionResult {
@@ -36,6 +44,7 @@ export interface ActionResult {
   newState: DayState;
   error?: string;
   isBreak?: boolean;
+  isManual?: boolean;
 }
 
 class StateMachine {
@@ -55,6 +64,7 @@ class StateMachine {
       lunchReturnTime: null, exitTime: null,
       nextNotificationAt: null, completedAt: null,
       breaks: [], suspendedStatus: null,
+      manualFlags: {},
     };
   }
 
@@ -66,6 +76,7 @@ class StateMachine {
         if (saved.date === this.getToday()) {
           // Ensure breaks array exists for legacy states
           if (!saved.breaks) saved.breaks = [];
+          if (!saved.manualFlags) saved.manualFlags = {};
           return saved;
         }
         logger.info(`Day changed (${saved.date} → ${this.getToday()}). Resetting state.`);
@@ -115,38 +126,54 @@ class StateMachine {
     return { success: true, message: 'Jornada iniciada. Registre sua entrada.', newState: this.getState() };
   }
 
+
+
   /** User presses the button — captures current time and advances state */
   public registerCurrentTime(): ActionResult {
+    const now = this.getNow();
+    return this.registerTimeInternal(now, false);
+  }
+
+  /** User manually informs a time that was punched externally */
+  public registerManualTime(time: string): ActionResult {
+    // Validate format HH:mm
+    if (!/^\d{2}:\d{2}$/.test(time)) {
+      return { success: false, message: 'Formato inválido. Use HH:mm.', newState: this.getState() };
+    }
+    const [h, m] = time.split(':').map(Number);
+    if (h < 0 || h > 23 || m < 0 || m > 59) {
+      return { success: false, message: 'Horário inválido.', newState: this.getState() };
+    }
+    return this.registerTimeInternal(time, true);
+  }
+
+  /** Core registration logic shared by automatic and manual flows */
+  private registerTimeInternal(time: string, isManual: boolean): ActionResult {
     const today = this.getToday();
     if (this.state.date !== today) {
       this.state = this.createFreshState(today);
       this.saveState();
     }
 
-    const now = this.getNow();
-
     switch (this.state.status) {
       case 'IDLE':
       case 'AWAITING_ENTRY':
-        return this.registerEntry(now);
-
-      case 'AWAITING_LUNCH_OUT':
-        return this.registerLunchOut(now);
-
-      case 'AWAITING_LUNCH_RETURN':
-        return this.registerLunchReturn(now);
-
-      case 'AWAITING_FINAL_EXIT':
-        return this.registerFinalExit(now);
+        return this.registerEntry(time, isManual);
 
       case 'WAITING_LUNCH_OUT':
+      case 'AWAITING_LUNCH_OUT':
+        return this.registerLunchOut(time, isManual);
+
       case 'WAITING_LUNCH_RETURN':
+      case 'AWAITING_LUNCH_RETURN':
+        return this.registerLunchReturn(time, isManual);
+
       case 'WAITING_FINAL_EXIT':
-        // Interval click -> Unscheduled Break
-        return this.registerBreakOut(now);
+      case 'AWAITING_FINAL_EXIT':
+        return this.registerFinalExit(time, isManual);
 
       case 'IN_BREAK':
-        return this.registerBreakReturn(now);
+        return this.registerBreakReturn(time);
 
       case 'COMPLETED':
         return {
@@ -160,50 +187,82 @@ class StateMachine {
     }
   }
 
-  private registerEntry(time: string): ActionResult {
+  /** Explicitly register an unscheduled break (called via dedicated button) */
+  public registerBreak(): ActionResult {
+    const today = this.getToday();
+    if (this.state.date !== today) {
+      this.state = this.createFreshState(today);
+      this.saveState();
+    }
+
+    const now = this.getNow();
+    const allowedStates: DayStatus[] = ['WAITING_LUNCH_OUT', 'WAITING_LUNCH_RETURN', 'WAITING_FINAL_EXIT'];
+
+    if (this.state.status === 'IN_BREAK') {
+      return this.registerBreakReturn(now);
+    }
+
+    if (!allowedStates.includes(this.state.status)) {
+      return { success: false, message: 'Não é possível registrar saída não prevista neste momento.', newState: this.getState() };
+    }
+
+    return this.registerBreakOut(now);
+  }
+
+  private registerEntry(time: string, isManual: boolean = false): ActionResult {
     this.state.entryTime = time;
     this.state.status = 'WAITING_LUNCH_OUT';
+    if (isManual) this.state.manualFlags.entry = true;
     this.recalculateTargets();
     this.saveState();
 
+    const tag = isManual ? ' ✏️ (Manual)' : '';
     return {
       success: true,
-      message: `Entrada registrada: ${time}. Próximo passo: Almoço.`,
+      message: `Entrada registrada: ${time}.${tag} Próximo passo: Almoço.`,
       newState: this.getState(),
+      isManual,
     };
   }
 
-  private registerLunchOut(time: string): ActionResult {
+  private registerLunchOut(time: string, isManual: boolean = false): ActionResult {
     this.state.lunchOutTime = time;
     this.state.status = 'WAITING_LUNCH_RETURN';
+    if (isManual) this.state.manualFlags.lunchOut = true;
     this.recalculateTargets();
     this.saveState();
 
+    const tag = isManual ? ' ✏️ (Manual)' : '';
     return {
       success: true,
-      message: `Saída almoço registrada: ${time}. Próximo passo: Retorno.`,
+      message: `Saída almoço registrada: ${time}.${tag} Próximo passo: Retorno.`,
       newState: this.getState(),
+      isManual,
     };
   }
 
-  private registerLunchReturn(time: string): ActionResult {
+  private registerLunchReturn(time: string, isManual: boolean = false): ActionResult {
     this.state.lunchReturnTime = time;
     this.state.status = 'WAITING_FINAL_EXIT';
+    if (isManual) this.state.manualFlags.lunchReturn = true;
     this.recalculateTargets();
     this.saveState();
 
+    const tag = isManual ? ' ✏️ (Manual)' : '';
     return {
       success: true,
-      message: `Retorno registrado: ${time}. Próximo passo: Saída Final.`,
+      message: `Retorno registrado: ${time}.${tag} Próximo passo: Saída Final.`,
       newState: this.getState(),
+      isManual,
     };
   }
 
-  private registerFinalExit(time: string): ActionResult {
+  private registerFinalExit(time: string, isManual: boolean = false): ActionResult {
     this.state.exitTime = time;
     this.state.status = 'COMPLETED';
     this.state.nextNotificationAt = null;
     this.state.completedAt = time;
+    if (isManual) this.state.manualFlags.exit = true;
     this.saveState();
 
     const breakMinutes = calculator.calculateTotalBreakMinutes(this.state.breaks);
@@ -213,10 +272,12 @@ class StateMachine {
       breakMinutes
     );
 
+    const tag = isManual ? ' ✏️ (Manual)' : '';
     return {
       success: true,
-      message: `Saída registrada: ${time}. Jornada finalizada!\n${summary}`,
+      message: `Saída registrada: ${time}.${tag} Jornada finalizada!\n${summary}`,
       newState: this.getState(),
+      isManual,
     };
   }
 
