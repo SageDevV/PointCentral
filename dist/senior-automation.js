@@ -14,10 +14,10 @@ class SeniorAutomationService {
         return this.run({ dryRun: false });
     }
     async run(options) {
-        const config = this.getConfig();
         let browser = null;
         let context = null;
         try {
+            const config = this.getConfig();
             browser = await playwright_1.chromium.launch({
                 headless: config.headless,
                 executablePath: config.executablePath,

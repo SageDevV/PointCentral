@@ -33,11 +33,12 @@ class SeniorAutomationService {
   }
 
   public async run(options: { dryRun: boolean }): Promise<SeniorAutomationResult> {
-    const config = this.getConfig();
     let browser: Browser | null = null;
     let context: BrowserContext | null = null;
 
     try {
+      const config = this.getConfig();
+
       browser = await chromium.launch({
         headless: config.headless,
         executablePath: config.executablePath,
