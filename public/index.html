@@ -905,12 +905,9 @@
             }
         }
 
-        // Senior platform URL
-        const SENIOR_URL = 'https://platform.senior.com.br/senior-x/#/Gest%C3%A3o%20de%20Pessoas%20%7C%20HCM/1/res:%2F%2Fsenior.com.br%2Fhcm%2Fpontomobile%2FclockingEvent?category=frame&link=https:%2F%2Fplatform.senior.com.br%2Fhcm-pontomobile%2Fhcm%2Fpontomobile%2F%23%2Fclocking-event&withCredentials=true&r=1';
-
         let countdownActive = false;
 
-        // Register time (button click) + open Senior platform
+        // Register time through the backend Senior automation
         async function registerTime() {
             if (countdownActive) return;
 
@@ -931,51 +928,24 @@
             setTimeout(() => ripple.remove(), 600);
 
             try {
-                // Open Senior platform in new tab IMMEDIATELY
-                window.open(SENIOR_URL, '_blank');
-
-                // Countdown logic
-                let secondsLeft = 15;
                 $('btn-icon').textContent = '⏳';
-                
-                const updateButton = () => {
-                    $('btn-label').textContent = `Registrando em ${secondsLeft}s...`;
-                };
-                
-                updateButton();
+                $('btn-label').textContent = 'Entrando na Senior...';
                 btn.style.animation = 'glow-pulse 1.5s infinite';
 
-                const countdownInterval = setInterval(() => {
-                    secondsLeft--;
-                    if (secondsLeft > 0) {
-                        updateButton();
-                    } else {
-                        clearInterval(countdownInterval);
-                    }
-                }, 1000);
-
-                // Wait for 15 seconds
-                await new Promise(resolve => setTimeout(resolve, 15000));
-                clearInterval(countdownInterval);
-                
-                $('btn-label').textContent = 'Processando...';
-                btn.style.animation = '';
-
-                // Register time on the server
                 const res = await fetch('/api/register', { method: 'POST' });
                 const data = await res.json();
 
-                if (data.success) {
+                if (res.ok && data.success) {
                     showToast(data.message.split('.')[0] + '.', 'success');
                     updateUI(data.newState);
                 } else {
-                    showToast(data.message || data.error, 'error');
+                    showToast(data.error || data.message || 'Falha ao registrar na Senior.', 'error');
                     btn.disabled = false;
                     $('btn-label').textContent = originalLabel;
                     $('btn-icon').textContent = originalIcon;
                 }
             } catch (err) {
-                showToast('Erro de conexão.', 'error');
+                showToast('Erro de conexão com a automação da Senior.', 'error');
                 btn.disabled = false;
                 $('btn-label').textContent = originalLabel;
                 $('btn-icon').textContent = originalIcon;

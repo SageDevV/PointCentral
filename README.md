@@ -45,6 +45,29 @@ O CallMeBot é a forma mais rápida de começar para uso pessoal. Siga os passos
    npm start
    ```
 
+## Senior
+
+O botao principal de registro chama o backend em `/api/register`. O backend abre a Senior com Playwright, faz login usando `SENIOR_USERNAME` e `SENIOR_PASSWORD`, localiza o botao `Registrar Ponto` e so entao atualiza o estado local do PointCentral.
+
+Configure as variaveis no Railway ou no `.env` local:
+
+```bash
+SENIOR_USERNAME=
+SENIOR_PASSWORD=
+SENIOR_POINT_URL=
+SENIOR_REGISTER_BUTTON_TEXT=Registrar Ponto
+SENIOR_AUTOMATION_TIMEOUT_MS=90000
+SENIOR_BROWSER_HEADLESS=true
+```
+
+Para validar sem bater o ponto, chame:
+
+```bash
+curl -X POST http://localhost:3000/api/senior/verify
+```
+
+Esse endpoint faz login e confirma que a pagina/botao de marcacao foi localizado, mas nao clica em `Registrar Ponto`.
+
 ## 🛡️ Estratégia de Prevenção de Duplicidade
 
 O sistema utiliza um mecanismo de persistência simples e eficaz:
