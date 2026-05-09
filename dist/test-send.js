@@ -5,13 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-const whatsapp_1 = __importDefault(require("./whatsapp"));
+const telegram_1 = __importDefault(require("./telegram"));
 const logger_1 = __importDefault(require("./logger"));
 async function test() {
-    logger_1.default.info('🚀 Iniciando teste de disparo manual...');
-    const success = await whatsapp_1.default.sendMessage('TESTE_MANUAL');
+    logger_1.default.info('🚀 Iniciando teste de disparo manual via Telegram...');
+    const success = await telegram_1.default.sendMessage('TESTE_MANUAL');
     if (success) {
-        logger_1.default.info('✅ Teste concluído com sucesso! Verifique seu WhatsApp.');
+        logger_1.default.info('✅ Teste concluído com sucesso! Verifique seu Telegram.');
     }
     else {
         logger_1.default.error('❌ O teste falhou. Verifique os logs acima para detalhes.');

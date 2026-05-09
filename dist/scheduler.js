@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_cron_1 = __importDefault(require("node-cron"));
 const luxon_1 = require("luxon");
 const state_machine_1 = __importDefault(require("./state-machine"));
-const whatsapp_1 = __importDefault(require("./whatsapp"));
+const telegram_1 = __importDefault(require("./telegram"));
 const logger_1 = __importDefault(require("./logger"));
 class SchedulerService {
     constructor() {
@@ -38,7 +38,7 @@ class SchedulerService {
         logger_1.default.info('Sending morning greeting...');
         const result = state_machine_1.default.startDay();
         if (result.success) {
-            await whatsapp_1.default.sendEntryReminder();
+            await telegram_1.default.sendEntryReminder();
             this.morningNotificationSent = true;
             logger_1.default.info('Morning greeting sent.');
         }
@@ -59,13 +59,13 @@ class SchedulerService {
         const targetTime = state.nextNotificationAt || '';
         switch (state.status) {
             case 'WAITING_LUNCH_OUT':
-                await whatsapp_1.default.sendLunchOutReminder(targetTime);
+                await telegram_1.default.sendLunchOutReminder(targetTime);
                 break;
             case 'WAITING_LUNCH_RETURN':
-                await whatsapp_1.default.sendLunchReturnReminder(targetTime);
+                await telegram_1.default.sendLunchReturnReminder(targetTime);
                 break;
             case 'WAITING_FINAL_EXIT':
-                await whatsapp_1.default.sendFinalExitReminder(targetTime);
+                await telegram_1.default.sendFinalExitReminder(targetTime);
                 break;
         }
         logger_1.default.info('Dynamic notification sent.');

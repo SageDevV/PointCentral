@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const state_machine_1 = __importDefault(require("./state-machine"));
-const whatsapp_1 = __importDefault(require("./whatsapp"));
+const telegram_1 = __importDefault(require("./telegram"));
 const logger_1 = __importDefault(require("./logger"));
 const senior_automation_1 = __importDefault(require("./senior-automation"));
 const router = (0, express_1.Router)();
@@ -57,22 +57,22 @@ router.post('/api/register', async (req, res) => {
             return;
         }
         const result = state_machine_1.default.registerCurrentTime();
-        // Se o registro foi com sucesso, envia confirmação + previsão via WhatsApp
+        // Se o registro foi com sucesso, envia confirmação + previsão via Telegram
         if (result.success) {
             const appUrl = process.env.APP_URL || 'http://localhost:3000';
-            let wppMsg = '';
+            let tgMsg = '';
             if (result.isBreak) {
                 // Mensagem customizada para saídas/retornos não previstos
-                wppMsg = result.message.includes('Saída não prevista')
-                    ? `⚠️ *Saída não prevista registrada!*\n\n${result.message}\n\n👉 Acesse para registrar o retorno: ${appUrl}`
-                    : `✅ *Retorno registrado!*\n\n${result.message}\n\n👉 Acesse: ${appUrl}`;
+                tgMsg = result.message.includes('Saída não prevista')
+                    ? `⚠️ <b>Saída não prevista registrada!</b>\n\n${result.message}\n\n👉 <a href="${appUrl}">Acesse para registrar o retorno</a>`
+                    : `✅ <b>Retorno registrado!</b>\n\n${result.message}\n\n👉 <a href="${appUrl}">Acesse</a>`;
             }
             else {
                 // Mensagem padrão para marcos oficiais
-                wppMsg = `✅ *Ponto Registrado!*\n\n${result.message}\n\n👉 Acesse: ${appUrl}`;
+                tgMsg = `✅ <b>Ponto Registrado!</b>\n\n${result.message}\n\n👉 <a href="${appUrl}">Acesse</a>`;
             }
-            // Não bloqueia a requisição HTTP aguardando o envio do WhatsApp (fire-and-forget)
-            whatsapp_1.default.sendRawMessage(wppMsg).catch(err => logger_1.default.error('Error sending confirmation whatsapp:', err));
+            // Não bloqueia a requisição HTTP aguardando o envio do Telegram (fire-and-forget)
+            telegram_1.default.sendRawMessage(tgMsg).catch(err => logger_1.default.error('Error sending confirmation telegram:', err));
         }
         res.json({ ...result, senior: seniorResult });
     }
@@ -87,12 +87,12 @@ router.post('/api/register-break', async (_req, res) => {
         const result = state_machine_1.default.registerBreak();
         if (result.success) {
             const appUrl = process.env.APP_URL || 'http://localhost:3000';
-            const wppMsg = result.isBreak
+            const tgMsg = result.isBreak
                 ? (result.message.includes('Saída não prevista')
-                    ? `⚠️ *Saída não prevista registrada!*\n\n${result.message}\n\n👉 Acesse para registrar o retorno: ${appUrl}`
-                    : `✅ *Retorno registrado!*\n\n${result.message}\n\n👉 Acesse: ${appUrl}`)
-                : `✅ *Ponto Registrado!*\n\n${result.message}\n\n👉 Acesse: ${appUrl}`;
-            whatsapp_1.default.sendRawMessage(wppMsg).catch(err => logger_1.default.error('Error sending break whatsapp:', err));
+                    ? `⚠️ <b>Saída não prevista registrada!</b>\n\n${result.message}\n\n👉 <a href="${appUrl}">Acesse para registrar o retorno</a>`
+                    : `✅ <b>Retorno registrado!</b>\n\n${result.message}\n\n👉 <a href="${appUrl}">Acesse</a>`)
+                : `✅ <b>Ponto Registrado!</b>\n\n${result.message}\n\n👉 <a href="${appUrl}">Acesse</a>`;
+            telegram_1.default.sendRawMessage(tgMsg).catch(err => logger_1.default.error('Error sending break telegram:', err));
         }
         res.json(result);
     }
@@ -112,8 +112,8 @@ router.post('/api/register-manual', async (req, res) => {
         const result = state_machine_1.default.registerManualTime(time);
         if (result.success) {
             const appUrl = process.env.APP_URL || 'http://localhost:3000';
-            const wppMsg = `✏️ *Ponto Manual Registrado!*\n\n${result.message}\n\n👉 Acesse: ${appUrl}`;
-            whatsapp_1.default.sendRawMessage(wppMsg).catch(err => logger_1.default.error('Error sending manual whatsapp:', err));
+            const tgMsg = `✏️ <b>Ponto Manual Registrado!</b>\n\n${result.message}\n\n👉 <a href="${appUrl}">Acesse</a>`;
+            telegram_1.default.sendRawMessage(tgMsg).catch(err => logger_1.default.error('Error sending manual telegram:', err));
         }
         res.json(result);
     }
