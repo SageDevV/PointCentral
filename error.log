@@ -17,3 +17,7 @@
 {"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T19:04:50.851Z"}
 {"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T19:09:50.721Z"}
 {"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T19:10:00.123Z"}
+{"level":"error","message":"Telegram API returned status 400: {\"ok\":false,\"error_code\":400,\"description\":\"Bad Request: can't parse entities: Can't find end of the entity starting at byte offset 31\"}","timestamp":"2026-05-09T16:39:53.481Z"}
+{"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-05-09T16:39:53.481Z"}
+{"level":"error","message":"Telegram API returned status 400: {\"ok\":false,\"error_code\":400,\"description\":\"Bad Request: chat not found\"}","timestamp":"2026-05-09T16:41:17.692Z"}
+{"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-05-09T16:41:17.692Z"}

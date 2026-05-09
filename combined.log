@@ -94,3 +94,12 @@
 {"level":"info","message":"Timer triggered: WAITING_FINAL_EXIT, target: 15:53","timestamp":"2026-05-04T19:10:00.017Z"}
 {"level":"error","message":"Error sending WhatsApp message:","timestamp":"2026-05-04T19:10:00.123Z"}
 {"level":"info","message":"Dynamic notification sent.","timestamp":"2026-05-04T19:10:00.123Z"}
+{"level":"info","message":"🚀 Iniciando teste de disparo manual via Telegram...","timestamp":"2026-05-09T16:39:50.946Z"}
+{"level":"error","message":"Telegram API returned status 400: {\"ok\":false,\"error_code\":400,\"description\":\"Bad Request: can't parse entities: Can't find end of the entity starting at byte offset 31\"}","timestamp":"2026-05-09T16:39:53.481Z"}
+{"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-05-09T16:39:53.481Z"}
+{"level":"info","message":"🚀 Iniciando teste de disparo manual via Telegram...","timestamp":"2026-05-09T16:41:16.313Z"}
+{"level":"error","message":"Telegram API returned status 400: {\"ok\":false,\"error_code\":400,\"description\":\"Bad Request: chat not found\"}","timestamp":"2026-05-09T16:41:17.692Z"}
+{"level":"error","message":"❌ O teste falhou. Verifique os logs acima para detalhes.","timestamp":"2026-05-09T16:41:17.692Z"}
+{"level":"info","message":"🚀 Iniciando teste de disparo manual via Telegram...","timestamp":"2026-05-09T16:56:08.569Z"}
+{"level":"info","message":"Telegram message sent successfully","timestamp":"2026-05-09T16:56:09.388Z"}
+{"level":"info","message":"✅ Teste concluído com sucesso! Verifique seu Telegram.","timestamp":"2026-05-09T16:56:09.388Z"}

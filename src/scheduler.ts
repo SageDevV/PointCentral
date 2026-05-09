@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 import { DateTime } from 'luxon';
 import stateMachine from './state-machine';
-import whatsapp from './whatsapp';
+import telegram from './telegram';
 import logger from './logger';
 
 class SchedulerService {
@@ -38,7 +38,7 @@ class SchedulerService {
     logger.info('Sending morning greeting...');
     const result = stateMachine.startDay();
     if (result.success) {
-      await whatsapp.sendEntryReminder();
+      await telegram.sendEntryReminder();
       this.morningNotificationSent = true;
       logger.info('Morning greeting sent.');
     }
@@ -62,13 +62,13 @@ class SchedulerService {
     const targetTime = state.nextNotificationAt || '';
     switch (state.status) {
       case 'WAITING_LUNCH_OUT':
-        await whatsapp.sendLunchOutReminder(targetTime);
+        await telegram.sendLunchOutReminder(targetTime);
         break;
       case 'WAITING_LUNCH_RETURN':
-        await whatsapp.sendLunchReturnReminder(targetTime);
+        await telegram.sendLunchReturnReminder(targetTime);
         break;
       case 'WAITING_FINAL_EXIT':
-        await whatsapp.sendFinalExitReminder(targetTime);
+        await telegram.sendFinalExitReminder(targetTime);
         break;
     }
 
