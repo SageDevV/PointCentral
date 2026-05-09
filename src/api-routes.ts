@@ -58,7 +58,7 @@ router.post('/api/register', async (req: Request, res: Response) => {
 
     const result = stateMachine.registerCurrentTime();
     
-    // Se o registro foi com sucesso, envia confirmação + previsão via WhatsApp
+    // Se o registro foi com sucesso, envia confirmação + previsão via Telegram
     if (result.success) {
       const appUrl = process.env.APP_URL || 'http://localhost:3000';
       let tgMsg = '';
