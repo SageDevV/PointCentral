@@ -106,3 +106,7 @@
 {"level":"info","message":"🚀 Iniciando teste de disparo manual via Telegram...","timestamp":"2026-05-09T17:37:05.780Z"}
 {"level":"info","message":"Telegram message sent successfully","timestamp":"2026-05-09T17:37:06.708Z"}
 {"level":"info","message":"✅ Teste concluído com sucesso! Verifique seu Telegram.","timestamp":"2026-05-09T17:37:06.708Z"}
+{"level":"info","message":"Day changed (2026-05-04 → 2026-05-09). Resetting state.","timestamp":"2026-05-09T18:56:49.152Z"}
+{"level":"info","message":"🚀 PointCentral server listening on port 3000","timestamp":"2026-05-09T18:56:49.537Z"}
+{"level":"info","message":"Dynamic Scheduler started for America/Sao_Paulo","timestamp":"2026-05-09T18:56:49.537Z"}
+{"level":"info","message":"Cron jobs registered: [every minute tick] [07:00 Mon-Fri greeting]","timestamp":"2026-05-09T18:56:49.545Z"}

@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import express from 'express';
+import express, { Request, Response } from 'express';
 import path from 'path';
 import logger from './logger';
 import scheduler from './scheduler';
@@ -21,10 +21,10 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(apiRoutes);
 
 // Health check
-app.get('/health', (_req, res) => res.status(200).json({ status: 'ok' }));
+app.get('/health', (_req: Request, res: Response) => res.status(200).json({ status: 'ok' }));
 
 // Fallback: serve index.html for any non-API route (SPA behavior)
-app.get('/{*path}', (_req, res) => {
+app.get('/{*path}', (_req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
