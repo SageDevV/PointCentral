@@ -21,7 +21,6 @@
     "node-cron": "^4.2.1",
     "playwright": "^1.59.1",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.3",
     "winston": "^3.19.0"
   },
   "devDependencies": {
@@ -29,6 +28,7 @@
     "@types/luxon": "^3.7.1",
     "@types/node": "^25.6.0",
     "@types/node-cron": "^3.0.11",
-    "@types/winston": "^2.4.4"
+    "@types/winston": "^2.4.4",
+    "typescript": "^5.4.5"
   }
 }
