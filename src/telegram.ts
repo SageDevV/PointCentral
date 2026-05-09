@@ -2,9 +2,9 @@ import axios from 'axios';
 import logger from './logger';
 
 class TelegramService {
-  private get botToken() { return process.env.TELEGRAM_BOT_TOKEN; }
-  private get chatId() { return process.env.TELEGRAM_CHAT_ID; }
-  private get appUrl() { return process.env.APP_URL || 'http://localhost:3000'; }
+  private get botToken() { return process.env.TELEGRAM_BOT_TOKEN?.trim(); }
+  private get chatId() { return process.env.TELEGRAM_CHAT_ID?.trim(); }
+  private get appUrl() { return (process.env.APP_URL || 'http://localhost:3000').trim(); }
 
   /**
    * Send the morning greeting notification with a link to the chat
