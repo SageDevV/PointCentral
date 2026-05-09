@@ -71,6 +71,9 @@ class TelegramService {
     }
 
     try {
+      const maskedToken = this.botToken ? `${this.botToken.substring(0, 5)}...` : 'MISSING';
+      logger.info(`Sending Telegram message to Chat ID: ${this.chatId} (Token: ${maskedToken})`);
+
       const url = `https://api.telegram.org/bot${this.botToken}/sendMessage`;
       const response = await axios.post(url, {
         chat_id: this.chatId,
