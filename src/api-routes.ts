@@ -2,8 +2,6 @@ import { Router, Request, Response } from 'express';
 import stateMachine from './state-machine';
 import telegram from './telegram';
 import logger from './logger';
-import seniorAutomation from './senior-automation';
-
 const router = Router();
 
 /** GET /api/state — Returns today's day state */
@@ -16,46 +14,9 @@ router.get('/api/state', (_req: Request, res: Response) => {
   }
 });
 
-/** POST /api/senior/verify - Login and locate the Senior point page without clicking register */
-router.post('/api/senior/verify', async (_req: Request, res: Response) => {
+/** POST /api/register - Capture current time and advance to next step */
+router.post('/api/register', async (_req: Request, res: Response) => {
   try {
-    const seniorResult = await seniorAutomation.verifyAccess();
-    res.status(seniorResult.success ? 200 : 502).json(seniorResult);
-  } catch (err) {
-    logger.error('Error validating Senior access:', err);
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-});
-
-/** POST /api/register - Register in Senior, then capture current time and advance to next step */
-router.post('/api/register', async (req: Request, res: Response) => {
-  try {
-    const dryRun = req.query.dryRun === 'true' || req.body?.dryRun === true;
-    const seniorResult = dryRun
-      ? await seniorAutomation.verifyAccess()
-      : await seniorAutomation.registerPoint();
-
-    if (!seniorResult.success) {
-      res.status(502).json({
-        success: false,
-        message: 'Nao foi possivel registrar o ponto na Senior.',
-        error: seniorResult.message,
-        senior: seniorResult,
-        newState: stateMachine.getState(),
-      });
-      return;
-    }
-
-    if (dryRun) {
-      res.json({
-        success: true,
-        message: 'Verificacao da Senior concluida sem registrar o ponto.',
-        senior: seniorResult,
-        newState: stateMachine.getState(),
-      });
-      return;
-    }
-
     const result = stateMachine.registerCurrentTime();
     
     // Se o registro foi com sucesso, envia confirmação + previsão via Telegram
@@ -77,7 +38,7 @@ router.post('/api/register', async (req: Request, res: Response) => {
       telegram.sendRawMessage(tgMsg).catch(err => logger.error('Error sending confirmation telegram:', err));
     }
 
-    res.json({ ...result, senior: seniorResult });
+    res.json(result);
   } catch (err) {
     logger.error('Error registering time:', err);
     res.status(500).json({ error: 'Internal server error' });

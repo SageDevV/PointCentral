@@ -929,7 +929,7 @@
 
             try {
                 $('btn-icon').textContent = '⏳';
-                $('btn-label').textContent = 'Entrando na Senior...';
+                $('btn-label').textContent = 'Registrando...';
                 btn.style.animation = 'glow-pulse 1.5s infinite';
 
                 const res = await fetch('/api/register', { method: 'POST' });
@@ -938,14 +938,16 @@
                 if (res.ok && data.success) {
                     showToast(data.message.split('.')[0] + '.', 'success');
                     updateUI(data.newState);
+                    // Encaminhar para o link da Senior em nova aba
+                    window.open('https://platform.senior.com.br/hcm/point-mobile/', '_blank');
                 } else {
-                    showToast(data.error || data.message || 'Falha ao registrar na Senior.', 'error');
+                    showToast(data.error || data.message || 'Falha ao registrar ponto.', 'error');
                     btn.disabled = false;
                     $('btn-label').textContent = originalLabel;
                     $('btn-icon').textContent = originalIcon;
                 }
             } catch (err) {
-                showToast('Erro de conexão com a automação da Senior.', 'error');
+                showToast('Erro de conexão.', 'error');
                 btn.disabled = false;
                 $('btn-label').textContent = originalLabel;
                 $('btn-icon').textContent = originalIcon;
