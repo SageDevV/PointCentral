@@ -677,6 +677,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        let countdownActive = false;
         const $ = id => document.getElementById(id);
 
         // Clock
@@ -757,10 +758,22 @@
             const cfg = BTN_CONFIG[state.status] || BTN_CONFIG['IDLE'];
 
             // Button
-            $('btn-icon').textContent = cfg.icon;
-            $('btn-label').textContent = cfg.label;
-            $('action-btn').className = `action-btn ${cfg.cls}`;
-            $('action-btn').disabled = !cfg.enabled;
+            if (!countdownActive) {
+                $('btn-icon').textContent = cfg.icon;
+                $('btn-label').textContent = cfg.label;
+                $('action-btn').className = `action-btn ${cfg.cls}`;
+                $('action-btn').disabled = !cfg.enabled;
+
+                // Break button state
+                const breakBtn = $('break-btn');
+                if (BREAK_BTN_STATES.includes(state.status)) {
+                    breakBtn.style.display = 'flex';
+                    breakBtn.innerHTML = state.status === 'IN_BREAK' ? '🔙 Registrar Retorno (não previsto)' : '☕ Saída não prevista';
+                    breakBtn.disabled = false;
+                } else {
+                    breakBtn.style.display = 'none';
+                }
+            }
 
             // Status
             $('status-text').innerHTML = STATUS_TEXT[state.status] || '';
@@ -853,15 +866,6 @@
             const manualBtn = $('manual-btn');
             manualBtn.disabled = !MANUAL_ALLOWED.includes(state.status);
 
-            // Break button state
-            const breakBtn = $('break-btn');
-            if (BREAK_BTN_STATES.includes(state.status)) {
-                breakBtn.style.display = 'flex';
-                breakBtn.innerHTML = state.status === 'IN_BREAK' ? '🔙 Registrar Retorno (não previsto)' : '☕ Saída não prevista';
-            } else {
-                breakBtn.style.display = 'none';
-            }
-
             // Store current state
             currentState = state;
         }
@@ -925,8 +929,6 @@
                 console.error('Load error:', err);
             }
         }
-
-        let countdownActive = false;
 
         // Register time through the backend with a 15s delay for manual registration
         async function registerTime() {
