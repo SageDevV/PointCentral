@@ -871,26 +871,47 @@
 
             const btn = $('break-btn');
             const originalHTML = btn.innerHTML;
+            
+            countdownActive = true;
             btn.disabled = true;
-            btn.innerHTML = 'Processando...';
 
-            try {
-                const res = await fetch('/api/register-break', { method: 'POST' });
-                const data = await res.json();
+            // 1. Abrir a Senior imediatamente
+            window.open('https://platform.senior.com.br/', '_blank');
 
-                if (data.success) {
-                    showToast(data.message.split('.')[0] + '.', 'warning');
-                    updateUI(data.newState);
-                    // Encaminhar para o link da Senior em nova aba
-                    window.open('https://platform.senior.com.br/senior-x/#/Gest%C3%A3o%20de%20Pessoas%20%7C%20HCM/1/res:%2F%2Fsenior.com.br%2Fhcm%2Fpontomobile%2FclockingEvent?category=frame&link=https:%2F%2Fplatform.senior.com.br%2Fhcm-pontomobile%2Fhcm%2Fpontomobile%2F%23%2Fclocking-event&withCredentials=true&r=1', '_blank');
-                } else {
-                    showToast(data.message || data.error, 'error');
+            // 2. Countdown de 15 segundos
+            let secondsLeft = 15;
+            const timer = setInterval(() => {
+                secondsLeft--;
+                btn.innerHTML = `Aguardando (${secondsLeft}s)...`;
+                if (secondsLeft <= 0) {
+                    clearInterval(timer);
+                    proceedWithBreak();
                 }
-            } catch (err) {
-                showToast('Erro de conexão.', 'error');
-            } finally {
-                btn.disabled = false;
-                if (btn.innerHTML === 'Processando...') btn.innerHTML = originalHTML;
+            }, 1000);
+
+            btn.innerHTML = `Aguardando (${secondsLeft}s)...`;
+
+            async function proceedWithBreak() {
+                try {
+                    btn.innerHTML = 'Processando...';
+                    const res = await fetch('/api/register-break', { method: 'POST' });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        showToast(data.message.split('.')[0] + '.', 'warning');
+                        updateUI(data.newState);
+                    } else {
+                        showToast(data.message || data.error, 'error');
+                        btn.disabled = false;
+                        btn.innerHTML = originalHTML;
+                    }
+                } catch (err) {
+                    showToast('Erro de conexão.', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                } finally {
+                    countdownActive = false;
+                }
             }
         }
 
@@ -907,7 +928,7 @@
 
         let countdownActive = false;
 
-        // Register time through the backend Senior automation
+        // Register time through the backend with a 15s delay for manual registration
         async function registerTime() {
             if (countdownActive) return;
 
@@ -915,8 +936,8 @@
             const originalLabel = $('btn-label').textContent;
             const originalIcon = $('btn-icon').textContent;
             
-            btn.disabled = true;
             countdownActive = true;
+            btn.disabled = true;
 
             // Ripple effect
             const ripple = document.createElement('span');
@@ -927,33 +948,49 @@
             btn.appendChild(ripple);
             setTimeout(() => ripple.remove(), 600);
 
-            try {
-                $('btn-icon').textContent = '⏳';
-                $('btn-label').textContent = 'Registrando...';
-                btn.style.animation = 'glow-pulse 1.5s infinite';
+            // 1. Abrir a Senior imediatamente
+            window.open('https://platform.senior.com.br/', '_blank');
 
-                const res = await fetch('/api/register', { method: 'POST' });
-                const data = await res.json();
+            // 2. Countdown de 15 segundos
+            let secondsLeft = 15;
+            $('btn-icon').textContent = '⏳';
+            btn.style.animation = 'glow-pulse 1.5s infinite';
 
-                if (res.ok && data.success) {
-                    showToast(data.message.split('.')[0] + '.', 'success');
-                    updateUI(data.newState);
-                    // Encaminhar para o link da Senior em nova aba
-                    window.open('https://platform.senior.com.br/senior-x/#/Gest%C3%A3o%20de%20Pessoas%20%7C%20HCM/1/res:%2F%2Fsenior.com.br%2Fhcm%2Fpontomobile%2FclockingEvent?category=frame&link=https:%2F%2Fplatform.senior.com.br%2Fhcm-pontomobile%2Fhcm%2Fpontomobile%2F%23%2Fclocking-event&withCredentials=true&r=1', '_blank');
-                } else {
-                    showToast(data.error || data.message || 'Falha ao registrar ponto.', 'error');
+            const timer = setInterval(() => {
+                secondsLeft--;
+                $('btn-label').textContent = `Aguardando registro (${secondsLeft}s)...`;
+                if (secondsLeft <= 0) {
+                    clearInterval(timer);
+                    proceedWithRegistration();
+                }
+            }, 1000);
+
+            $('btn-label').textContent = `Aguardando registro (${secondsLeft}s)...`;
+
+            async function proceedWithRegistration() {
+                try {
+                    $('btn-label').textContent = 'Finalizando...';
+                    const res = await fetch('/api/register', { method: 'POST' });
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                        showToast(data.message.split('.')[0] + '.', 'success');
+                        updateUI(data.newState);
+                    } else {
+                        showToast(data.error || data.message || 'Falha ao registrar ponto.', 'error');
+                        btn.disabled = false;
+                        $('btn-label').textContent = originalLabel;
+                        $('btn-icon').textContent = originalIcon;
+                    }
+                } catch (err) {
+                    showToast('Erro de conexão.', 'error');
                     btn.disabled = false;
                     $('btn-label').textContent = originalLabel;
                     $('btn-icon').textContent = originalIcon;
+                } finally {
+                    countdownActive = false;
+                    btn.style.animation = '';
                 }
-            } catch (err) {
-                showToast('Erro de conexão.', 'error');
-                btn.disabled = false;
-                $('btn-label').textContent = originalLabel;
-                $('btn-icon').textContent = originalIcon;
-            } finally {
-                countdownActive = false;
-                btn.style.animation = '';
             }
         }
 
