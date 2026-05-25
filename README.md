@@ -46,7 +46,7 @@ Para receber as notificações, você precisa criar um bot oficial e obter suas 
 
 O botão principal de registro chama o backend em `/api/register`. O backend abre a Senior com Playwright, faz login usando `SENIOR_USERNAME` e `SENIOR_PASSWORD`, localiza o botão `Registrar Ponto` e então atualiza o estado local do PointCentral.
 
-Configure as variáveis no Railway ou no `.env` local:
+Configure as variáveis no provedor cloud ou no `.env` local:
 
 ```bash
 SENIOR_USERNAME=
@@ -64,15 +64,9 @@ O sistema mantém o estado do dia em um arquivo JSON (`day-state.json`) para gar
 - O fluxo de Entrada -> Almoço -> Retorno -> Saída seja respeitado.
 - Mesmo após reinicializações, o sistema saiba em qual etapa do dia o usuário está.
 
-## 🌍 Deploy
+## Deploy
 
-Recomendamos o uso do **Railway** para o deploy.
-
-### Passo a passo para Deploy:
-1. Crie uma conta no [Railway.app](https://railway.app/).
-2. Conecte seu repositório GitHub.
-3. Vá em **Settings > Variables** e adicione todas as variáveis do arquivo `.env`.
-4. O Railway iniciará o build e execução automaticamente via `npm start`.
+O deploy anterior usava Railway. Para migrar para outro provedor, veja [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## 📝 Logs
 

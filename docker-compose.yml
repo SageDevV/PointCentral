@@ -1,0 +1,18 @@
+services:
+  pointcentral:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      STATE_PATH: /data/day-state.json
+      STORAGE_PATH: /data/storage.json
+    volumes:
+      - pointcentral-data:/data
+
+volumes:
+  pointcentral-data:
