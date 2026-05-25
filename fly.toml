@@ -12,9 +12,6 @@ kill_timeout = "5s"
   TIMEZONE = "America/Sao_Paulo"
   STATE_PATH = "/data/day-state.json"
   STORAGE_PATH = "/data/storage.json"
-  SENIOR_REGISTER_BUTTON_TEXT = "Registrar Ponto"
-  SENIOR_AUTOMATION_TIMEOUT_MS = "90000"
-  SENIOR_BROWSER_HEADLESS = "true"
 
 [[mounts]]
   source = "pointcentral_data"
@@ -38,4 +35,4 @@ kill_timeout = "5s"
 [[vm]]
   cpu_kind = "shared"
   cpus = 1
-  memory = "1gb"
+  memory = "512mb"

@@ -42,20 +42,9 @@ Para receber as notificações, você precisa criar um bot oficial e obter suas 
    npm start
    ```
 
-## Senior Automation
+## Registro de Ponto
 
-O botão principal de registro chama o backend em `/api/register`. O backend abre a Senior com Playwright, faz login usando `SENIOR_USERNAME` e `SENIOR_PASSWORD`, localiza o botão `Registrar Ponto` e então atualiza o estado local do PointCentral.
-
-Configure as variáveis no provedor cloud ou no `.env` local:
-
-```bash
-SENIOR_USERNAME=
-SENIOR_PASSWORD=
-SENIOR_POINT_URL=
-SENIOR_REGISTER_BUTTON_TEXT=Registrar Ponto
-SENIOR_AUTOMATION_TIMEOUT_MS=90000
-SENIOR_BROWSER_HEADLESS=true
-```
+O PointCentral registra o estado local da jornada e envia lembretes pelo Telegram. A Senior fica apenas como acesso manual pela interface; o backend nao automatiza login, navegador ou clique de registro.
 
 ## 🛡️ Persistência de Estado
 

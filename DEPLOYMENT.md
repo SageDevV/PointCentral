@@ -13,14 +13,14 @@ O arquivo `fly.toml` deste repo ja configura:
 - Healthcheck em `/health`.
 - `auto_stop_machines = "off"` e `min_machines_running = 1`, para manter o cron vivo.
 - Volume em `/data`, usado por `STATE_PATH` e `STORAGE_PATH`.
-- VM inicial de `1gb`; se o Playwright ficar sem memoria, altere para `2gb`.
+- VM inicial de `512mb`, suficiente para o backend sem automacao de navegador.
 
 Passos:
 
 ```bash
 fly launch --copy-config --name pointcentral --region gru --no-deploy
 fly volumes create pointcentral_data --region gru --size 1
-fly secrets set TELEGRAM_BOT_TOKEN="..." TELEGRAM_CHAT_ID="..." SENIOR_USERNAME="..." SENIOR_PASSWORD="..." SENIOR_POINT_URL="..." APP_URL="https://pointcentral.fly.dev"
+fly secrets set TELEGRAM_BOT_TOKEN="..." TELEGRAM_CHAT_ID="..." APP_URL="https://pointcentral.fly.dev"
 fly deploy
 fly logs
 ```
@@ -46,7 +46,7 @@ Para acessar via Telegram com um link confiavel, publique a porta `3000` por HTT
 ## Outras opcoes
 
 - Render Free e Koyeb Free nao sao ideais para este app, porque instancias gratuitas podem escalar para zero ou suspender por inatividade. Isso quebra os lembretes do `node-cron`.
-- Render pago funciona, mas para Playwright o plano de 512 MB pode ficar apertado; o Standard de 2 GB e mais seguro.
+- Render pago tambem funciona para o backend atual, mas Fly.io continua simples por ja usar Docker e volume.
 - DigitalOcean Droplet funciona bem com `docker compose`, mas exige configurar firewall, Docker, HTTPS e atualizacoes da VM.
 
 ## Variaveis obrigatorias
@@ -60,12 +60,6 @@ APP_URL=
 TIMEZONE=America/Sao_Paulo
 STATE_PATH=/data/day-state.json
 STORAGE_PATH=/data/storage.json
-SENIOR_USERNAME=
-SENIOR_PASSWORD=
-SENIOR_POINT_URL=
-SENIOR_REGISTER_BUTTON_TEXT=Registrar Ponto
-SENIOR_AUTOMATION_TIMEOUT_MS=90000
-SENIOR_BROWSER_HEADLESS=true
 ```
 
 ## Limpeza antes do push
@@ -78,4 +72,4 @@ git add .gitignore .dockerignore fly.toml docker-compose.yml DEPLOYMENT.md .env.
 git commit -m "Prepare cloud migration"
 ```
 
-Se o `.env` com credenciais reais ja foi enviado para um remoto, rotacione `TELEGRAM_BOT_TOKEN`, `SENIOR_PASSWORD` e qualquer outro segredo antes de seguir.
+Se o `.env` com credenciais reais ja foi enviado para um remoto, rotacione `TELEGRAM_BOT_TOKEN` e qualquer outro segredo antes de seguir.

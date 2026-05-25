@@ -14,20 +14,19 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@types/express": "^5.0.6",
+    "@types/luxon": "^3.7.1",
+    "@types/node": "^25.6.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/winston": "^2.4.4",
     "axios": "^1.15.2",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "luxon": "^3.7.2",
     "node-cron": "^4.2.1",
-    "playwright": "^1.59.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5",
-    "winston": "^3.19.0",
-    "@types/express": "^5.0.6",
-    "@types/luxon": "^3.7.1",
-    "@types/node": "^25.6.0",
-    "@types/node-cron": "^3.0.11",
-    "@types/winston": "^2.4.4"
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "@types/node": "^25.6.0"

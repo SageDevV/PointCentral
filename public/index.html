@@ -564,6 +564,29 @@
         }
         .break-btn:active { transform: scale(0.98); }
 
+        .senior-link {
+            width: 100%;
+            margin-top: 12px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-dim);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        .senior-link:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+        }
+
         @media (max-width: 480px) {
             .clock { font-size: 44px; }
             .container { gap: 20px; }
@@ -630,6 +653,9 @@
             <button class="break-btn" id="break-btn" onclick="registerBreakAction()" style="display: none;">
                 ☕ Saída não prevista
             </button>
+            <a class="senior-link" href="https://platform.senior.com.br/senior-x/#/Gest%C3%A3o%20de%20Pessoas%20%7C%20HCM/1/res:%2F%2Fsenior.com.br%2Fhcm%2Fpontomobile%2FclockingEvent?category=frame&amp;link=https:%2F%2Fplatform.senior.com.br%2Fhcm-pontomobile%2Fhcm%2Fpontomobile%2F%23%2Fclocking-event&amp;withCredentials=true&amp;r=1" target="_blank" rel="noopener noreferrer">
+                Abrir Senior
+            </a>
         </div>
 
         <!-- Summary (after completed) -->
@@ -875,47 +901,30 @@
 
             const btn = $('break-btn');
             const originalHTML = btn.innerHTML;
-            
+
             countdownActive = true;
             btn.disabled = true;
+            btn.innerHTML = 'Processando...';
 
-            // 1. Abrir a Senior imediatamente
-            window.open('https://platform.senior.com.br/', '_blank');
+            try {
+                const res = await fetch('/api/register-break', { method: 'POST' });
+                const data = await res.json();
 
-            // 2. Countdown de 15 segundos
-            let secondsLeft = 15;
-            const timer = setInterval(() => {
-                secondsLeft--;
-                btn.innerHTML = `Aguardando (${secondsLeft}s)...`;
-                if (secondsLeft <= 0) {
-                    clearInterval(timer);
-                    proceedWithBreak();
-                }
-            }, 1000);
-
-            btn.innerHTML = `Aguardando (${secondsLeft}s)...`;
-
-            async function proceedWithBreak() {
-                try {
-                    btn.innerHTML = 'Processando...';
-                    const res = await fetch('/api/register-break', { method: 'POST' });
-                    const data = await res.json();
-
-                    if (data.success) {
-                        showToast(data.message.split('.')[0] + '.', 'warning');
-                        updateUI(data.newState);
-                    } else {
-                        showToast(data.message || data.error, 'error');
-                        btn.disabled = false;
-                        btn.innerHTML = originalHTML;
-                    }
-                } catch (err) {
-                    showToast('Erro de conexão.', 'error');
+                if (data.success) {
+                    countdownActive = false;
+                    showToast(data.message.split('.')[0] + '.', 'warning');
+                    updateUI(data.newState);
+                } else {
+                    showToast(data.message || data.error, 'error');
                     btn.disabled = false;
                     btn.innerHTML = originalHTML;
-                } finally {
-                    countdownActive = false;
                 }
+            } catch (err) {
+                showToast('Erro de conexão.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            } finally {
+                countdownActive = false;
             }
         }
 
@@ -930,14 +939,14 @@
             }
         }
 
-        // Register time through the backend with a 15s delay for manual registration
+        // Register time through the backend only; Senior access is manual.
         async function registerTime() {
             if (countdownActive) return;
 
             const btn = $('action-btn');
             const originalLabel = $('btn-label').textContent;
             const originalIcon = $('btn-icon').textContent;
-            
+
             countdownActive = true;
             btn.disabled = true;
 
@@ -950,49 +959,30 @@
             btn.appendChild(ripple);
             setTimeout(() => ripple.remove(), 600);
 
-            // 1. Abrir a Senior imediatamente
-            window.open('https://platform.senior.com.br/', '_blank');
-
-            // 2. Countdown de 15 segundos
-            let secondsLeft = 15;
             $('btn-icon').textContent = '⏳';
-            btn.style.animation = 'glow-pulse 1.5s infinite';
+            $('btn-label').textContent = 'Registrando...';
 
-            const timer = setInterval(() => {
-                secondsLeft--;
-                $('btn-label').textContent = `Aguardando registro (${secondsLeft}s)...`;
-                if (secondsLeft <= 0) {
-                    clearInterval(timer);
-                    proceedWithRegistration();
-                }
-            }, 1000);
+            try {
+                const res = await fetch('/api/register', { method: 'POST' });
+                const data = await res.json();
 
-            $('btn-label').textContent = `Aguardando registro (${secondsLeft}s)...`;
-
-            async function proceedWithRegistration() {
-                try {
-                    $('btn-label').textContent = 'Finalizando...';
-                    const res = await fetch('/api/register', { method: 'POST' });
-                    const data = await res.json();
-
-                    if (res.ok && data.success) {
-                        showToast(data.message.split('.')[0] + '.', 'success');
-                        updateUI(data.newState);
-                    } else {
-                        showToast(data.error || data.message || 'Falha ao registrar ponto.', 'error');
-                        btn.disabled = false;
-                        $('btn-label').textContent = originalLabel;
-                        $('btn-icon').textContent = originalIcon;
-                    }
-                } catch (err) {
-                    showToast('Erro de conexão.', 'error');
+                if (res.ok && data.success) {
+                    countdownActive = false;
+                    showToast(data.message.split('.')[0] + '.', 'success');
+                    updateUI(data.newState);
+                } else {
+                    showToast(data.error || data.message || 'Falha ao registrar ponto.', 'error');
                     btn.disabled = false;
                     $('btn-label').textContent = originalLabel;
                     $('btn-icon').textContent = originalIcon;
-                } finally {
-                    countdownActive = false;
-                    btn.style.animation = '';
                 }
+            } catch (err) {
+                showToast('Erro de conexão.', 'error');
+                btn.disabled = false;
+                $('btn-label').textContent = originalLabel;
+                $('btn-icon').textContent = originalIcon;
+            } finally {
+                countdownActive = false;
             }
         }
 
